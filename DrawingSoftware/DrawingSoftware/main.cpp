@@ -244,4 +244,6 @@ int main(int argc, char* argv[])
     MyWindow window;
     window.show();
     return app.exec();
+
+    // felix was here
 }
