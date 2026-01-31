@@ -1,0 +1,555 @@
+#include "BrushTool.h"
+#include <LayerManager.h>
+
+
+
+#include<HueDial.h>
+
+
+
+BrushTool::BrushTool(QWidget* parent)
+    : QWidget(parent)
+{
+    //setWindowTitle("Bad Apple");
+    //setFixedSize(1920, 1080);
+    //setStyleSheet("background-color: rgb(30,30,30);");
+    setAttribute(Qt::WA_TabletTracking);
+    setAttribute(Qt::WA_MouseTracking);
+    setMouseTracking(true);
+
+
+    pngBackground = QImage(QDir::currentPath() + "/Images/PNGBackground.png");
+
+    background = QImage(1100, 1100, QImage::Format_ARGB32_Premultiplied);
+    image = background;
+    image.fill(Qt::transparent);
+    originalImage = image;
+    background.fill(Qt::white);
+    layers = { background, image };
+
+    undoStack.push(layers);
+    brush = QImage(QDir::currentPath() + "/Images/ChalkRot.png");
+
+    brushOutline = QImage(QDir::currentPath() + "/Images/ChalkRot_Outline.png");
+
+    colourWindow = new ColourWindow(this);
+    //colourWindow->show();
+
+    layerManager = new LayerManager(this);
+    //layerManager->show();
+
+    connect(layerManager, &LayerManager::layerSelected,
+        this, [=](const QString& layerName, int layerIndex) {
+            selectedLayerIndex = layerIndex;
+        });
+
+
+    connect(layerManager, &LayerManager::layerAdded,
+        this, [=](int layerIndex) {
+
+            layers.insert(layerIndex, originalImage);
+            pushUndo(layers);
+            layerManager->update();
+            update();
+        });
+
+
+    connect(layerManager, &LayerManager::layerDeleted,
+        this, [=](int layerIndex) {
+            if (layerIndex < 0 || layerIndex >= layers.size()) {
+                return;
+            }
+
+            layers.removeAt(layerIndex);
+            pushUndo(layers);
+
+            if (layers.count() == 0) {
+                selectedLayerIndex = 0;
+            }
+            layerManager->update();
+            update();
+        });
+}
+
+
+
+
+void BrushTool::tabletEvent(QTabletEvent* event)
+{
+    if (event->type() == QEvent::TabletPress) {
+        if (layers.count() < 1) return;
+        if (panningEnabled) {
+            lastPanPoint = event->position().toPoint();
+            isPanning = true;
+        }
+        else {
+            drawing = true;
+            usingTablet = true;
+            lastPointF = mapToImageF(getScaledPointF(event->position()));
+
+            if (!isErasing)
+            {
+                // FIX ME
+                colour = colourWindow->updateColour();
+                //colour = QColor::fromHsl(0, 0, 0);
+
+
+            }
+
+            brush = adjustBrushColour(brush, colour);
+        }
+    }
+
+    if (event->type() == QEvent::TabletMove) {
+        if (isPanning)
+        {
+
+            if (!lastPanPoint.isNull()) {
+                QPoint change = event->position().toPoint() - lastPanPoint;
+                panOffset += change;
+                lastPanPoint = event->position().toPoint();
+            }
+        }
+        else {
+            hoverPoint = event->position();
+            isHovering = true;
+            delayCounter += 1;
+            if (delayCounter == 5) {
+                repaint();
+                delayCounter = 0;
+            }
+        }
+        update();
+
+    }
+
+    if (event->type() == QEvent::TabletMove && drawing && !isPanning) {
+        if (layers.count() < 1) return;
+
+        currentPoint = mapToImageF(getScaledPointF(event->position()));
+        qreal pressure = event->pressure();
+        xTilt = event->xTilt();
+        yTilt = event->yTilt();
+
+        QPainter painter(&layers[selectedLayerIndex]);
+
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        if (isErasing) {
+            painter.setCompositionMode(QPainter::CompositionMode_Clear);
+
+        }
+
+        drawStroke(painter, lastPointF, currentPoint, pressure);
+
+        lastPointF = currentPoint;
+        update();
+
+    }
+
+    if (event->type() == QEvent::TabletRelease)
+    {
+        if (isPanning) {
+            isPanning = false;
+        }
+        if (layers.count() < 1) return;
+
+        lastPointF = currentPoint;
+        drawing = false;
+        usingTablet = true;
+        pushUndo(layers);
+        redoStack.clear();
+    }
+
+    event->accept();
+}
+
+void BrushTool::keyPressEvent(QKeyEvent* event)
+{
+
+    //if (event->key() == 61 && event->modifiers() & Qt::ControlModifier)
+    //    zoomIn();
+    //if (event->key() == 45 && event->modifiers() & Qt::ControlModifier)
+    //    zoomOut();
+
+    //if (event->key() == Qt::Key_0 && event->modifiers() & Qt::ControlModifier)
+    //    resetZoom();
+
+    //if (event->key() == Qt::Key_Z && event->modifiers() & Qt::ControlModifier)
+    //    undo();
+
+    //if (event->key() == Qt::Key_Y && event->modifiers() & Qt::ControlModifier)
+    //    redo();
+
+    //if (event->key() == Qt::Key_Space)
+    //{
+    //    panningEnabled = true;
+    //    setCursor(Qt::OpenHandCursor);
+    //}
+
+    //if (event->key() == Qt::Key_E)
+    //{
+    //    if (isErasing == true) {
+    //        isErasing = false;
+    //        // FIX ME
+    //        //colour = colourWindow->updateColour();
+    //    }
+    //    else {
+
+    //        isErasing = true;
+    //    }
+    //}
+
+    //if (event->key() == Qt::Key_B)
+    //{
+    //    if (brushType == "chalk") {
+
+    //        brush = QImage(QDir::currentPath() + "/Images/CircleBrush.png");
+    //        brushOutline = QImage(QDir::currentPath() + "/Images/CircleBrush_Outline.png");
+    //        brushType = "circle";
+    //    }
+    //    else {
+    //        brush = QImage(QDir::currentPath() + "/Images/ChalkRot.png");
+    //        brushOutline = QImage(QDir::currentPath() + "/Images/ChalkRot_Outline.png");
+    //        brushType = "chalk";
+
+    //    }
+    //}
+    //if (event->key() == 91)
+    //{
+    //    alterBrushSize(-1);
+    //}
+    //if (event->key() == 93) {
+    //    alterBrushSize(1);
+    //}
+}
+void BrushTool::keyReleaseEvent(QKeyEvent* event)
+{
+    if (event->isAutoRepeat())
+    {
+        return;
+    }
+    if (event->key() == Qt::Key_Space)
+    {
+        lastPanPoint = QPoint();
+        panningEnabled = false;
+        setCursor(Qt::ArrowCursor);
+    }
+}
+void BrushTool::applyZoom(float zoomAmount)
+{
+
+    if (1 <= zoomPercentage * zoomAmount <= 12800)
+    {
+        zoomPercentage = zoomPercentage * zoomAmount;
+    }
+    else if (zoomPercentage < 1) { zoomPercentage = 1; }
+    else { zoomPercentage = 12800; }
+    QPointF hoverFromCenter = rect().center() + hoverPoint;
+    repaint();
+    update();
+
+}
+
+void BrushTool::zoomIn()
+{
+    applyZoom((1.111));
+}
+
+void BrushTool::zoomOut()
+{
+    applyZoom((0.9));
+}
+
+void BrushTool::resetZoom()
+{
+    zoomPercentage = 100.0;
+    applyZoom(1);
+}
+
+QPoint BrushTool::getScaledPoint(QPoint pos) {
+    return  QPoint(((pos.x() - panOffset.x())), ((pos.y() - panOffset.y())));
+}
+
+QPointF BrushTool::getScaledPointF(QPointF pos) {
+    return QPointF(((pos.x() - panOffset.x())), ((pos.y() - panOffset.y())));
+}
+
+void BrushTool::alterBrushSize(int multiplier)
+{
+    int alterAmoumt;
+    if (brushSize < 10) {
+        alterAmoumt = 1;
+    }
+    else if (brushSize < 50) {
+        alterAmoumt = 5;
+    }
+    else if (brushSize < 100) {
+        alterAmoumt = 10;
+    }
+    else if (brushSize < 200) {
+        alterAmoumt = 25;
+    }
+    else {
+        alterAmoumt = 100;
+    }
+
+    brushSize = brushSize + alterAmoumt * multiplier;
+    brushSize = qBound(1, brushSize, 500);
+    update();
+
+}
+void BrushTool::mousePressEvent(QMouseEvent* event)
+{
+    if (usingTablet == true) return;
+    if (layers.count() < 1) return;
+
+    if (event->button() == Qt::LeftButton) {
+        if (panningEnabled) {
+            lastPanPoint = event->pos();
+            isPanning = true;
+        }
+        else {
+            drawing = true;
+            lastPoint = mapToImage(getScaledPoint(event->pos()));
+            if (!isErasing)
+            {
+                // FIX ME 
+                //colour = QColor::fromHsl(0, 0, 0);
+                colour = colourWindow->updateColour();
+            }
+            brush = adjustBrushColour(brush, colour);
+        }
+
+    }
+}
+
+void BrushTool::mouseMoveEvent(QMouseEvent* event)
+{
+
+    if (usingTablet == true) return;
+    if (layers.count() < 1) return;
+    if (isPanning)
+    {
+        if (!lastPanPoint.isNull()) {
+            QPoint change = event->pos() - lastPanPoint;
+            panOffset += change;
+            lastPanPoint = event->pos();
+        }
+    }
+    else {
+        if (drawing && (event->buttons() & Qt::LeftButton)) {
+            QPoint currentPoint = mapToImage(getScaledPoint(event->pos()));
+
+            QPainter painter(&layers[selectedLayerIndex]);
+
+            painter.setRenderHint(QPainter::Antialiasing, true);
+            if (isErasing) {
+                painter.setCompositionMode(QPainter::CompositionMode_Clear);
+            }
+            drawStroke(painter, lastPoint.toPointF(), currentPoint.toPointF(), 1.0);
+            lastPoint = currentPoint;
+            update();
+        }
+        else {
+            hoverPoint = event->pos();
+            isHovering = true;
+            if (delayCounter == 5) {
+                repaint();
+                delayCounter = 0;
+            }
+
+        }
+    }
+    update();
+}
+
+void BrushTool::mouseReleaseEvent(QMouseEvent* event)
+{
+    if (isPanning) {
+        isPanning = false;
+    }
+
+    if (usingTablet == true) return;
+
+    if (event->button() == Qt::LeftButton) {
+        drawing = false;
+        pushUndo(layers);
+        redoStack.clear();
+    }
+
+}
+
+void BrushTool::paintEvent(QPaintEvent* event)
+{
+    qDebug() << selectedLayerIndex;
+    QPainter painter(this);
+    QPoint center = rect().center();
+    QPoint hoverOffset = center - hoverPoint.toPoint();
+
+    painter.translate(center);
+    painter.scale(zoomPercentage / 100, zoomPercentage / 100);
+    painter.translate(panOffset / (zoomPercentage / 100.0));
+
+    painter.setRenderHint(QPainter::SmoothPixmapTransform, false);
+    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+
+    QPointF topLeft(-image.width() / 2.0, -image.height() / 2.0);
+
+    painter.drawImage(topLeft, pngBackground);
+
+    for (const QImage layer : layers) {
+        painter.drawImage(topLeft, layer);
+    }
+
+    painter.scale(100 / zoomPercentage, 100 / zoomPercentage);
+
+    painter.translate(-center);
+
+    if (isErasing) {
+        painter.setCompositionMode(QPainter::CompositionMode_Clear);
+
+    }
+    if (isHovering) if (!panningEnabled) {
+        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+        qreal size = brushSize;
+        QImage brushHover = brushOutline.scaled(size, size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+        QTransform t;
+        t.rotate(xTilt * 3);
+        t.scale(zoomPercentage / 100.0, zoomPercentage / 100.0);
+        brushHover = brushHover.transformed(t, Qt::SmoothTransformation);
+
+
+
+        QPointF drawPos(hoverPoint.x() - brushHover.width() / 2, hoverPoint.y() - brushHover.height() / 2);
+        drawPos = center - hoverOffset - panOffset;
+        drawPos = QPoint(drawPos.x() - brushHover.width() / 2, drawPos.y() - brushHover.height() / 2);
+
+        painter.drawImage(drawPos, brushHover);
+    }
+
+
+}
+
+
+
+
+
+
+
+
+void BrushTool::removeLayer(int layer)
+{
+    selectedLayerIndex -= 1;
+
+    if (selectedLayerIndex == layer)
+    {
+        selectedLayerIndex = qMax(0, selectedLayerIndex - 1);
+    }
+    else if (selectedLayerIndex > layer)
+    {
+        selectedLayerIndex--;
+    }
+}
+
+void BrushTool::pushUndo(const QVector<QImage>& layers)
+{
+    undoStack.push(layers);
+    if (undoStack.size() > 50) undoStack.remove(0);
+}
+
+QPoint BrushTool::mapToImage(const QPoint& p)
+{
+    QPoint center = rect().center();
+    QPoint offsetPoint = (p - center - panOffset) / (zoomPercentage / 100.0);
+
+
+    return offsetPoint + QPoint(image.width() / 2.0, image.height() / 2.0);
+}
+
+QPointF BrushTool::mapToImageF(const QPointF& p)
+{
+    QPointF center = rect().center();
+    QPointF offsetPoint = (p - center - panOffset) / (zoomPercentage / 100.0);
+
+
+    return offsetPoint + QPointF(image.width() / 2.0, image.height() / 2.0);
+}
+
+void BrushTool::undo()
+{
+    if (undoStack.size() <= 1) return;
+    redoStack.push(undoStack.pop());
+    layers = undoStack.top();
+    layerManager->undo();
+    update();
+}
+
+void BrushTool::redo()
+{
+    if (redoStack.isEmpty()) return;
+    layers = redoStack.pop();
+    undoStack.push(layers);
+    layerManager->redo();
+    update();
+}
+
+void BrushTool::drawStroke(QPainter& p, const QPointF& from, const QPointF& to, qreal pressure)
+{
+    QLineF line(from, to);
+    qreal dist = line.length();
+    qreal spacing = 50;
+
+    if (dist > 2.5 && spacing < 2.5) {
+        QPointF quaterPoint = lastPointF + QPointF((lastPointF.x() - currentPoint.x()) / 4, (lastPointF.y() - currentPoint.y()) / 4);
+        drawBrush(p, quaterPoint, pressure);
+        QPointF midPoint = lastPointF + QPointF((lastPointF.x() - currentPoint.x()) / 2, (lastPointF.y() - currentPoint.y()) / 2);
+        drawBrush(p, midPoint, pressure);
+        QPointF threeQuaterPoint = lastPointF + QPointF((lastPointF.x() - currentPoint.x()) / 4 * 3, (lastPointF.y() - currentPoint.y()) / 4 * 3);
+        drawBrush(p, threeQuaterPoint, pressure);
+    }
+
+    if (dist > spacing || spacing != 0.0) {
+        drawBrush(p, to, pressure);
+        lastPointF = currentPoint;
+        return;
+    }
+}
+
+
+
+void BrushTool::drawBrush(QPainter& p, const QPointF& pos, qreal pressure)
+{
+    qreal size = brushSize * pressure;
+    QImage scaled = brush.scaled(size, size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QTransform t;
+    t.rotate(xTilt * 3);
+
+
+    scaled = scaled.transformed(t, Qt::SmoothTransformation);
+
+    if (isErasing) {
+        p.setCompositionMode(QPainter::CompositionMode_DestinationOut);
+    }
+    QPointF drawPos(pos.x() - scaled.width() / 2, pos.y() - scaled.height() / 2);
+    p.setOpacity(1.0 * pressure);
+    p.drawImage(drawPos, scaled);
+}
+
+QImage BrushTool::adjustBrushColour(const QImage& brush, const QColor& color)
+{
+    if (brush.isNull())
+        return QImage();
+
+    QImage coloured = brush.convertToFormat(QImage::Format_ARGB32);
+
+    QPainter p(&coloured);
+    p.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    p.fillRect(coloured.rect(), colour);
+    p.end();
+
+    return coloured;
+};
+
+
+
