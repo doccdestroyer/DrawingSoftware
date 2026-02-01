@@ -4,18 +4,23 @@
 #include <QPainter>
 #include <QVector2D>
 #include <QMouseEvent>
+#include <QObject>
+
 
 class HueDial : public QDial
-
+    
 {
 
     //signals:
     //    void colorDialAngle(float angle);
-
+    Q_OBJECT
 public:
     HueDial(QWidget* parent = nullptr);
     float getSaturation() const;
     float getLightness() const;
+
+signals: 
+    void hueDialAngle(float angle);
 
 
 private:

@@ -39,9 +39,10 @@ LayerManager::LayerManager(QWidget* parent)
 
 
     onLayerClicked(layersList->item(1));
-    int index = 1;
-    emit layerSelected(layersList->item(1)->text(), index);
-
+    {
+        int index = 1;
+        emit layerSelected(layersList->item(1)->text(), index);
+    };
     connect(layersList, &QListWidget::itemClicked,
         this, &LayerManager::onLayerClicked);
 
@@ -66,6 +67,26 @@ LayerManager::LayerManager(QWidget* parent)
         this, &LayerManager::onDeleteClicked);
 
 
+
+
+
+    pngBackground = QImage(QDir::currentPath() + "/Images/PNGBackground.png");
+
+    background = QImage(1100, 1100, QImage::Format_ARGB32_Premultiplied);
+    image = background;
+    image.fill(Qt::transparent);
+    originalImage = image;
+    background.fill(Qt::white);
+    layers = { background, image };
+    selectionOverlay = image; 
+
+
+}
+
+void LayerManager::updateLayers(QVector<QImage> newLayers, QImage newOverlay)
+{
+    layers = newLayers;
+    selectionOverlay = newOverlay;
 }
 
 void LayerManager::addLayer(int destination, QString& name)

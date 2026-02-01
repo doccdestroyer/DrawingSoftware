@@ -1,0 +1,165 @@
+
+#include <MainWindow.h>
+
+MainWindow::MainWindow()
+{
+        setWindowTitle("Bad Apple");
+        setFixedSize(1920, 1080);
+        setStyleSheet("background-color: rgb(30,30,30);");
+        setAttribute(Qt::WA_TabletTracking);
+        setAttribute(Qt::WA_MouseTracking);
+        setMouseTracking(true);
+
+        //setFocusPolicy(Qt::StrongFocus);
+
+
+        //pngBackground = QImage(QDir::currentPath() + "/Images/PNGBackground.png");
+
+        //background = QImage(1100, 1100, QImage::Format_ARGB32_Premultiplied);
+        //image = background;
+        //image.fill(Qt::transparent);
+        //originalImage = image;
+        //background.fill(Qt::white);
+        //layers = { background, image };
+
+        //undoStack.push(layers);
+        //brush = QImage(QDir::currentPath() + "/Images/ChalkRot.png");
+
+        //brushOutline = QImage(QDir::currentPath() + "/Images/ChalkRot_Outline.png");
+        brushTool = new BrushTool(this);
+        lassoTool = new LassoTool(this);
+
+        colourWindow = brushTool->colourWindow;
+        colourWindow->show();
+
+        layerManager = brushTool->layerManager;
+        layerManager->show();
+
+        connect(brushTool, &BrushTool::lassoEnabled,
+            this, [&]()
+            {
+                layerManager->updateLayers(brushTool->layers, brushTool -> overlay);
+                lassoTool->zoomPercentage = brushTool->zoomPercentage;
+                lassoTool->panOffset = brushTool->panOffset;
+                lassoTool->selectionsPath = brushTool->selectionsPath;
+
+                dock->setWidget(lassoTool);
+                lassoTool->layers = layerManager->layers;
+                lassoTool->overlay = layerManager->selectionOverlay;
+        
+            });
+
+        connect(lassoTool, &LassoTool::brushEnabled,
+            this, [&]()
+            {
+                layerManager->updateLayers(lassoTool->layers, lassoTool->overlay);
+                brushTool->zoomPercentage = lassoTool->zoomPercentage;
+                brushTool->panOffset = lassoTool->panOffset;
+                brushTool->selectionsPath = lassoTool->selectionsPath;
+
+                dock->setWidget(brushTool);
+                brushTool->layers = layerManager->layers;
+                brushTool->overlay = layerManager->selectionOverlay;
+
+
+            });
+
+        createDockWindows();
+
+    }
+
+void MainWindow::keyPressEvent(QKeyEvent* event)
+{
+    //if (event->key() == 61 && event->modifiers() & Qt::ControlModifier)
+    //    brushTool->zoomIn();
+    //if (event->key() == 45 && event->modifiers() & Qt::ControlModifier)
+    //    brushTool->zoomOut();
+
+    //if (event->key() == Qt::Key_0 && event->modifiers() & Qt::ControlModifier)
+    //    brushTool->resetZoom();
+
+    //if (event->key() == Qt::Key_Z && event->modifiers() & Qt::ControlModifier)
+    //    brushTool->undo();
+    //layerManager->undo();
+    //if (event->key() == Qt::Key_Y && event->modifiers() & Qt::ControlModifier)
+    //    brushTool->redo();
+    //layerManager->redo();
+
+    //if (event->key() == Qt::Key_Space)
+    //{
+    //    //panningEnabled = true;
+    //    setCursor(Qt::OpenHandCursor);
+    //}
+
+    //if (event->key() == Qt::Key_E)
+    //{
+    //    /*  if (isErasing == true) {
+    //          isErasing = false;
+    //          colour = colourWindow->updateColour();
+    //      }
+    //      else {
+
+    //          isErasing = true;
+    //      }*/
+    //}
+    //if (event->key() == Qt::Key_L)
+    //{
+    //    layerManager->updateLayers(brushTool->layers, brushTool -> overlay);
+    //    dock->setWidget(lassoTool);
+    //    lassoTool->layers = layerManager->layers;
+    //    lassoTool->overlay = layerManager->selectionOverlay;
+
+
+    //}
+    //if (event->key() == Qt::Key_B)
+    //{
+    //    layerManager->updateLayers(lassoTool->layers, lassoTool->overlay);
+    //    dock->setWidget(brushTool);
+    //    brushTool->layers = layerManager->layers;
+    //    brushTool->overlay = layerManager->selectionOverlay;
+   
+    //    //if (brushType == "chalk") {
+   
+    //    //    brush = QImage(QDir::currentPath() + "/Images/CircleBrush.png");
+    //    //    brushOutline = QImage(QDir::currentPath() + "/Images/CircleBrush_Outline.png");
+    //    //    brushType = "circle";
+    //    //}
+    //    //else {
+    //    //    brush = QImage(QDir::currentPath() + "/Images/ChalkRot.png");
+    //    //    brushTool->brushOutline = QImage(QDir::currentPath() + "/Images/ChalkRot_Outline.png");
+    //    //    brushType = "chalk";
+   
+    //    //}
+    //}
+
+    //if (event->key() == 91)
+    //{
+    //    //alterBrushSize(-1);
+    //}
+
+    //if (event->key() == 93)
+    //{
+    //    //alterBrushSize(1);
+    //}
+
+}
+
+void MainWindow::createDockWindows()
+{
+    dock = new QDockWidget(tr("Customers"), this);
+    dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+
+    colourWindow->setMinimumSize(200, 200);
+    dock->setWidget(colourWindow);
+    addDockWidget(Qt::RightDockWidgetArea, dock);
+
+    dock = new QDockWidget(tr("Paragraphs"), this);
+
+    dock->setWidget(layerManager);
+    addDockWidget(Qt::RightDockWidgetArea, dock);
+
+    dock = new QDockWidget(tr("WindowFileName"), this);
+
+    dock->setWidget(brushTool);
+    addDockWidget(Qt::LeftDockWidgetArea, dock);
+}

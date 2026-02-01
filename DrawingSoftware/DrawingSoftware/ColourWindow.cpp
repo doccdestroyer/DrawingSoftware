@@ -8,10 +8,17 @@ ColourWindow::ColourWindow(QWidget* parent) : QWidget(parent)
     setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
     createWheel();
 
+
+    connect(dial, &HueDial::hueDialAngle,
+        this, [=](int angle)
+        {
+            angle = angle;
+        });
 }
 
-int ColourWindow::hueAngle() const
+int ColourWindow::hueAngle()
 {
+    angle = dial->value();
     return dial->value();
 }
 
@@ -19,7 +26,7 @@ QColor ColourWindow::updateColour() const
 {
     float saturation = dial->getSaturation();
     float lightness = dial->getLightness();
-    return QColor::fromHsl(360 - hueAngle(), int(saturation * 255), int(lightness * 255));
+    return QColor::fromHsl(360 - angle, int(saturation * 255), int(lightness * 255));
 }
 
 void ColourWindow::resizeEvent(QResizeEvent* event)

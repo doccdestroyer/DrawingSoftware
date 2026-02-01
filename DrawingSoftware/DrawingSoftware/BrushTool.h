@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 
 #include <QWidget>
 #include <QStack>
@@ -28,6 +27,13 @@ public:
     LayerManager* layerManager;
     ColourWindow* colourWindow;
 
+    QVector<QImage> layers;
+    QImage overlay;
+
+    float zoomPercentage = 100.0;
+    QPoint panOffset;
+
+    QVector<QPainterPath> selectionsPath;
 
     //signals:
 
@@ -47,12 +53,18 @@ protected:
     void mouseReleaseEvent(QMouseEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
 
+signals:
+    void lassoEnabled();
+
+private slots:
+    //void changeToLasso();
+
 private:
     bool panningEnabled = false;
     bool isPanning = false;
     QPoint lastPanPoint;
-    QPoint panOffset;
 
+    bool inSelection;
 
     int selectedLayerIndex = 1;
     QImage pngBackground;
@@ -68,6 +80,7 @@ private:
     bool drawing = false;
     bool usingTablet = false;
     bool isErasing = false;
+    bool isDrawing = false;
     int delayCounter;
 
     QImage brush;
@@ -83,8 +96,7 @@ private:
     QImage image;
     QImage background;
     QImage originalImage;
-    QVector<QImage> layers;
-    QImage selectedImage = image;
+    QImage selectedImage;
 
 
     QStack<QVector<QImage>> undoStack;
@@ -92,7 +104,6 @@ private:
 
 
     int brushSize = 50;
-    float zoomPercentage = 100.0;
 
 
     void removeLayer(int layer);

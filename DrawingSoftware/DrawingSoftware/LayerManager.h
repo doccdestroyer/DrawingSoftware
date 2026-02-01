@@ -3,7 +3,7 @@
 #include <QWidget>
 #include <QListWidget>
 #include <QStack>
-
+#include <QDir>
 
 class LayerManager : public QWidget
 {
@@ -18,6 +18,16 @@ public:
     void updateList();
     void restore(const QStringList& state);
     QListWidget* layersList = nullptr;
+
+    
+    QImage pngBackground;
+    QImage background;
+    QImage image;
+    QImage originalImage;
+    QVector<QImage> layers;
+    QImage selectionOverlay;
+
+    void updateLayers(QVector<QImage> newLayers, QImage newOverlay);
 
 
 signals:

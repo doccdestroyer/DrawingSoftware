@@ -8,13 +8,12 @@
 
 class ColourWindow : public QWidget
 {
-
 public:
 
     ColourWindow(QWidget* parent = nullptr);
 
-
-    int hueAngle() const;
+    int angle;
+    int hueAngle();
 
     QColor updateColour() const;
 
@@ -28,4 +27,5 @@ protected:
 private:
     HueDial* dial = new HueDial(this);
     QRectF windowArea;
+
 };

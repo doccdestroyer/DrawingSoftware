@@ -18,7 +18,7 @@ HueDial::HueDial(QWidget* parent) : QDial(parent)
 
 
         connect(this, &QDial::valueChanged, this, [this](int change) {
-            //emit colorDialAngle(static_cast<float>(change));
+            emit change;
             update();  // repaint when dial moves
             });
 
@@ -119,6 +119,7 @@ float HueDial::angleFromMouse(const QPoint& pos)
     if (angle < 0)
         angle += 360.0f;
 
+    emit angle;
     return angle;
 }
 
