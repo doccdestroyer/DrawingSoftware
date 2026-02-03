@@ -32,7 +32,6 @@ public:
 
     float zoomPercentage = 100.0;
     QPoint panOffset;
-
     QVector<QPainterPath> selectionsPath;
 
     //signals:
@@ -54,7 +53,10 @@ protected:
     void paintEvent(QPaintEvent* event) override;
 
 signals:
+    void brushDisabled();
+
     void lassoEnabled();
+    void bucketEnabled();
 
 private slots:
     //void changeToLasso();

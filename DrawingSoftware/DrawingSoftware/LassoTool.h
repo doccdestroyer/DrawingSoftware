@@ -41,6 +41,8 @@ public:
 
 
 signals:
+    void lassoDisabled();
+
     void brushEnabled();
 
 protected:

@@ -83,10 +83,13 @@ LayerManager::LayerManager(QWidget* parent)
 
 }
 
-void LayerManager::updateLayers(QVector<QImage> newLayers, QImage newOverlay)
+void LayerManager::updateLayers(QVector<QImage> newLayers, QImage newOverlay, float newPercentage, QPoint newOffset, QVector<QPainterPath> newSelectionsPath)
 {
     layers = newLayers;
     selectionOverlay = newOverlay;
+    zoomPercentage = newPercentage;
+    panOffset = newOffset;
+    selectionsPath = newSelectionsPath;
 }
 
 void LayerManager::addLayer(int destination, QString& name)

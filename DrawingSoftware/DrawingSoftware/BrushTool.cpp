@@ -211,9 +211,15 @@ void BrushTool::keyPressEvent(QKeyEvent* event)
     }
     if (event->key() == Qt::Key_L)
     {
+        emit brushDisabled();
         emit lassoEnabled();
     }
- 
+
+    if (event->key() == Qt::Key_K)
+    {
+        emit brushDisabled();
+        emit bucketEnabled();
+    }
 
     if (event->key() == 91)
     {

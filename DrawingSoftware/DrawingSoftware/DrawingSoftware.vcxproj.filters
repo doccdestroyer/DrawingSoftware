@@ -61,12 +61,12 @@
     <ClCompile Include="ToolSelectionMenu.cpp">
       <Filter>Resource Files\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BucketTool.cpp">
+      <Filter>Resource Files\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ColourWindow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ToolSelectionMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -84,6 +84,12 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="LassoTool.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ToolSelectionMenu.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="BucketTool.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

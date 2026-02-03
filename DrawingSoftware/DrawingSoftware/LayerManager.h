@@ -4,6 +4,7 @@
 #include <QListWidget>
 #include <QStack>
 #include <QDir>
+#include <QPainterPath>
 
 class LayerManager : public QWidget
 {
@@ -19,7 +20,10 @@ public:
     void restore(const QStringList& state);
     QListWidget* layersList = nullptr;
 
-    
+    float zoomPercentage = 100.0;
+    QPoint panOffset;
+    QVector<QPainterPath> selectionsPath;
+
     QImage pngBackground;
     QImage background;
     QImage image;
@@ -27,7 +31,7 @@ public:
     QVector<QImage> layers;
     QImage selectionOverlay;
 
-    void updateLayers(QVector<QImage> newLayers, QImage newOverlay);
+    void updateLayers(QVector<QImage> newLayers, QImage newOverlay, float newPercentage, QPoint newOffset, QVector<QPainterPath> newSelectionsPath);
 
 
 signals:

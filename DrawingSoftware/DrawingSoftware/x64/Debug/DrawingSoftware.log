@@ -1,7 +1,4 @@
 ﻿   Qt/MSBuild: 3.4.1.0
    Qt: 6.10.1
-  BrushTool.cpp
-C:\Users\akahn\OneDrive\Desktop\Year2\Specialism\Repo2\DrawingSoftware\DrawingSoftware\DrawingSoftware\BrushTool.cpp(269,11): warning C4804: '<=': unsafe use of type 'bool' in operation
-C:\Users\akahn\OneDrive\Desktop\Year2\Specialism\Repo2\DrawingSoftware\DrawingSoftware\DrawingSoftware\BrushTool.cpp(283,16): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\akahn\OneDrive\Desktop\Year2\Specialism\Repo2\DrawingSoftware\DrawingSoftware\DrawingSoftware\BrushTool.cpp(288,16): warning C4305: 'argument': truncation from 'double' to 'float'
+  BucketTool.cpp
   DrawingSoftware.vcxproj -> C:\Users\akahn\OneDrive\Desktop\Year2\Specialism\Repo2\DrawingSoftware\DrawingSoftware\x64\Debug\DrawingSoftware.exe

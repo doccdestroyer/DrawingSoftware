@@ -28,45 +28,120 @@ MainWindow::MainWindow()
         //brushOutline = QImage(QDir::currentPath() + "/Images/ChalkRot_Outline.png");
         brushTool = new BrushTool(this);
         lassoTool = new LassoTool(this);
+        bucketTool = new BucketTool(this);
+
+        toolSelectionMenu = new ToolSelectionMenu(this);
+
 
         colourWindow = brushTool->colourWindow;
-        colourWindow->show();
+        //colourWindow->show();
 
         layerManager = brushTool->layerManager;
-        layerManager->show();
+        //layerManager->show();
+
+        //toolSelectionMenu->show();
+        createDockWindows();
+
+
+
+        connect(brushTool, &BrushTool::brushDisabled,
+            this, [&]()
+            {
+                disableBrushTool();
+            });
+
+        connect(lassoTool, &LassoTool::lassoDisabled,
+            this, [&]()
+            {
+                disableLassoTool();
+            });
+
+
+
 
         connect(brushTool, &BrushTool::lassoEnabled,
             this, [&]()
             {
-                layerManager->updateLayers(brushTool->layers, brushTool -> overlay);
-                lassoTool->zoomPercentage = brushTool->zoomPercentage;
-                lassoTool->panOffset = brushTool->panOffset;
-                lassoTool->selectionsPath = brushTool->selectionsPath;
-
-                dock->setWidget(lassoTool);
-                lassoTool->layers = layerManager->layers;
-                lassoTool->overlay = layerManager->selectionOverlay;
-        
+                enableLassoTool();
             });
-
+        connect(brushTool, &BrushTool::bucketEnabled,
+            this, [&]()
+            {
+                enableBucketTool();
+            });
         connect(lassoTool, &LassoTool::brushEnabled,
             this, [&]()
             {
-                layerManager->updateLayers(lassoTool->layers, lassoTool->overlay);
-                brushTool->zoomPercentage = lassoTool->zoomPercentage;
-                brushTool->panOffset = lassoTool->panOffset;
-                brushTool->selectionsPath = lassoTool->selectionsPath;
-
-                dock->setWidget(brushTool);
-                brushTool->layers = layerManager->layers;
-                brushTool->overlay = layerManager->selectionOverlay;
-
-
+                enableBrushTool();
             });
 
-        createDockWindows();
+        connect(toolSelectionMenu, &ToolSelectionMenu::brushEnabled,
+            this, [&]()
+            {
+                enableBrushTool();
+            });
+        connect(toolSelectionMenu, &ToolSelectionMenu::lassoEnabled,
+            this, [&]()
+            {
+                enableLassoTool();
+            });
+
 
     }
+
+void MainWindow::disableBrushTool()
+{
+    layerManager->updateLayers(brushTool->layers,
+        brushTool->overlay,
+        brushTool->zoomPercentage,
+        brushTool->panOffset,
+        brushTool->selectionsPath);
+}
+
+void MainWindow::disableLassoTool()
+{
+    layerManager->updateLayers(lassoTool->layers, 
+        lassoTool->overlay, 
+        lassoTool->zoomPercentage, 
+        lassoTool->panOffset, 
+        lassoTool->selectionsPath);
+}
+
+void MainWindow::enableLassoTool()
+{
+    dock->setWidget(lassoTool);
+    lassoTool->layers = layerManager->layers;
+    lassoTool->zoomPercentage = layerManager->zoomPercentage;
+    lassoTool->panOffset = layerManager->panOffset;
+    lassoTool->selectionsPath = layerManager->selectionsPath;
+    lassoTool->overlay = layerManager->selectionOverlay;
+}
+
+void MainWindow::enableBrushTool()
+{
+    dock->setWidget(brushTool);
+    brushTool->layers = layerManager->layers;
+    brushTool->zoomPercentage = layerManager->zoomPercentage;
+    brushTool->panOffset = layerManager->panOffset;
+    brushTool->selectionsPath = layerManager->selectionsPath;
+    brushTool->overlay = layerManager->selectionOverlay;
+}
+
+
+
+
+void MainWindow::enableBucketTool()
+{
+    //layerManager->updateLayers(brushTool->layers, brushTool->overlay);
+    //brushTool->zoomPercentage = lassoTool->zoomPercentage;
+    //brushTool->panOffset = lassoTool->panOffset;
+    //brushTool->selectionsPath = lassoTool->selectionsPath;
+
+    dock->setWidget(bucketTool);
+    bucketTool->layers = layerManager->layers;
+    //bucketTool->overlay = layerManager->selectionOverlay;
+}
+
 
 void MainWindow::keyPressEvent(QKeyEvent* event)
 {
@@ -153,13 +228,27 @@ void MainWindow::createDockWindows()
     dock->setWidget(colourWindow);
     addDockWidget(Qt::RightDockWidgetArea, dock);
 
-    dock = new QDockWidget(tr("Paragraphs"), this);
 
+
+    dock = new QDockWidget(tr("Paragraphs"), this);
     dock->setWidget(layerManager);
     addDockWidget(Qt::RightDockWidgetArea, dock);
 
-    dock = new QDockWidget(tr("WindowFileName"), this);
+    QWidget *centralWidget = new QWidget();
+    QHBoxLayout *layout = new QHBoxLayout(centralWidget);
 
+    QDockWidget* ToolDock = new QDockWidget(tr("Tools"), this);
+    ToolDock->setWidget(toolSelectionMenu);
+    addDockWidget(Qt::LeftDockWidgetArea, ToolDock);
+    //layout->addWidget(toolSelectionMenu);
+
+    dock = new QDockWidget(tr("WindowFileName"), this);
     dock->setWidget(brushTool);
     addDockWidget(Qt::LeftDockWidgetArea, dock);
+    //layout->addWidget(brushTool);
+    //dock->setLayout(layout);
+
+    splitDockWidget(ToolDock, dock, Qt::Horizontal);
+    //addDockWidget(Qt::LeftDockWidgetArea, dock);
+
 }
