@@ -4,7 +4,7 @@
 MainWindow::MainWindow()
 {
         setWindowTitle("Bad Apple");
-        setFixedSize(1920, 1080);
+        setFixedSize(1440, 720);
         setStyleSheet("background-color: rgb(30,30,30);");
         setAttribute(Qt::WA_TabletTracking);
         setAttribute(Qt::WA_MouseTracking);
@@ -55,6 +55,11 @@ MainWindow::MainWindow()
             {
                 disableLassoTool();
             });
+        connect(bucketTool, &BucketTool::bucketDisabled,
+            this, [&]()
+            {
+                disableBucketTool();
+            });
 
 
 
@@ -75,6 +80,7 @@ MainWindow::MainWindow()
                 enableBrushTool();
             });
 
+
         connect(toolSelectionMenu, &ToolSelectionMenu::brushEnabled,
             this, [&]()
             {
@@ -84,6 +90,27 @@ MainWindow::MainWindow()
             this, [&]()
             {
                 enableLassoTool();
+            });
+        connect(toolSelectionMenu, &ToolSelectionMenu::bucketEnabled,
+            this, [&]()
+            {
+                enableBucketTool();
+            });
+
+        connect(toolSelectionMenu, &ToolSelectionMenu::brushDisabled,
+            this, [&]()
+            {
+                disableBrushTool();
+            });
+        connect(toolSelectionMenu, &ToolSelectionMenu::lassoDisabled,
+            this, [&]()
+            {
+                disableLassoTool();
+            });
+        connect(toolSelectionMenu, &ToolSelectionMenu::bucketDisabled,
+            this, [&]()
+            {
+                disableBucketTool();
             });
 
 
@@ -96,6 +123,15 @@ void MainWindow::disableBrushTool()
         brushTool->zoomPercentage,
         brushTool->panOffset,
         brushTool->selectionsPath);
+}
+
+void MainWindow::disableBucketTool()
+{
+    layerManager->updateLayers(bucketTool->layers,
+        bucketTool->overlay,
+        bucketTool->zoomPercentage,
+        bucketTool->panOffset,
+        bucketTool->selectionsPath);
 }
 
 void MainWindow::disableLassoTool()
@@ -132,14 +168,14 @@ void MainWindow::enableBrushTool()
 
 void MainWindow::enableBucketTool()
 {
-    //layerManager->updateLayers(brushTool->layers, brushTool->overlay);
-    //brushTool->zoomPercentage = lassoTool->zoomPercentage;
-    //brushTool->panOffset = lassoTool->panOffset;
-    //brushTool->selectionsPath = lassoTool->selectionsPath;
+
 
     dock->setWidget(bucketTool);
     bucketTool->layers = layerManager->layers;
-    //bucketTool->overlay = layerManager->selectionOverlay;
+    bucketTool->zoomPercentage = layerManager->zoomPercentage;
+    bucketTool->panOffset = layerManager->panOffset;
+    bucketTool->selectionsPath = layerManager->selectionsPath;
+    bucketTool->overlay = layerManager->selectionOverlay;
 }
 
 

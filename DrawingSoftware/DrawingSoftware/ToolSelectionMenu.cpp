@@ -6,7 +6,7 @@ ToolSelectionMenu::ToolSelectionMenu(QMainWindow* parent) : QMainWindow(parent)
 	setFixedSize(80, 1000);
 	setWindowTitle("Tools");
 
-	//selectedTool = "Brush";
+	selectedTool = "Brush";
 	//refreshTool();
 
 	createToolBar();
@@ -23,7 +23,7 @@ void ToolSelectionMenu::createToolBar()
 	toolBar->setAllowedAreas(Qt::LeftToolBarArea | Qt::RightToolBarArea);
 
 	QAction* brushAction = new QAction(
-		QIcon(QDir::currentPath() + "/Images/Icons/pen.png"),  // icon path (Qt resource or file)
+		QIcon(QDir::currentPath() + "/Images/Icons/pen.png"),
 		tr("&BrushTool"),
 		this);
 	brushAction->setStatusTip(tr("&Brush Tool"));;
@@ -34,24 +34,64 @@ void ToolSelectionMenu::createToolBar()
 
 
 	QAction* lassoAction = new QAction(
-		QIcon(QDir::currentPath() + "/Images/Icons/lasso.png"),  // icon path (Qt resource or file)
-		tr("&BrushTool"),
+		QIcon(QDir::currentPath() + "/Images/Icons/lasso.png"),
+		tr("&LassoTool"),
 		this);
-	lassoAction->setStatusTip(tr("&Brush Tool"));;
+	lassoAction->setStatusTip(tr("&Lasso Tool"));;
 	connect(lassoAction, &QAction::triggered, this, [&]() {
 		enableLassoTool();
 		});
 	toolBar->addAction(lassoAction);
+
+	QAction* bucketAction = new QAction(
+		QIcon(QDir::currentPath() + "/Images/Icons/bucket.png"),
+		tr("&BucketTool"),
+		this);
+	bucketAction->setStatusTip(tr("&Bucket Tool"));;
+	connect(bucketAction, &QAction::triggered, this, [&]() {
+		enableBucketTool();
+		});
+	toolBar->addAction(bucketAction);
 }
 
-
+void ToolSelectionMenu::disableTool()
+{
+	if (selectedTool == "Brush")
+	{
+		emit brushDisabled();
+	}
+	else if (selectedTool == "Lasso")
+	{
+		emit lassoDisabled();
+	}
+	else if (selectedTool == "Bucket")
+	{
+		emit bucketDisabled();
+	}
+}
 
 void ToolSelectionMenu::enableBrushTool()
 {
+
+	disableTool();
 	emit brushEnabled();
+	selectedTool = "Brush";
+
 }
 
 void ToolSelectionMenu::enableLassoTool()
 {
+	disableTool();
 	emit lassoEnabled();
+	selectedTool = "Lasso";
+
 }
+
+void ToolSelectionMenu::enableBucketTool()
+{
+	disableTool();
+	emit bucketEnabled();
+	selectedTool = "Bucket";
+
+}
+

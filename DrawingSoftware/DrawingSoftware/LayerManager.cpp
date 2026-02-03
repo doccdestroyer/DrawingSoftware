@@ -18,7 +18,15 @@ LayerManager::LayerManager(QWidget* parent)
     layersList->addItems({ "background", "Layer 1" });
     layersList->setSortingEnabled(true);
 
+    pngBackground = QImage(QDir::currentPath() + "/Images/PNGBackground.png");
 
+    background = QImage(1100, 1100, QImage::Format_ARGB32_Premultiplied);
+    image = background;
+    image.fill(Qt::transparent);
+    originalImage = image;
+    background.fill(Qt::white);
+    layers = { background, image };
+    selectionOverlay = image;
 
     auto* layout = new QVBoxLayout(this);
 
@@ -48,7 +56,16 @@ LayerManager::LayerManager(QWidget* parent)
 
     connect(newLayerButton, &QPushButton::clicked, this, [=]() {
         //int newIndex = layersList->count();
-        int newIndex = layersList->row(layersList->currentItem()) + 1;
+        int newIndex;
+        if (layers.count() == 0) 
+        {
+            newIndex = 0;
+        }
+        else
+        {
+            newIndex = layersList->row(layersList->currentItem()) + 1;
+
+        }
         QString name = QString("Layer %1").arg(newIndex);
         addLayer(newIndex, name);
         });
@@ -70,15 +87,7 @@ LayerManager::LayerManager(QWidget* parent)
 
 
 
-    pngBackground = QImage(QDir::currentPath() + "/Images/PNGBackground.png");
 
-    background = QImage(1100, 1100, QImage::Format_ARGB32_Premultiplied);
-    image = background;
-    image.fill(Qt::transparent);
-    originalImage = image;
-    background.fill(Qt::white);
-    layers = { background, image };
-    selectionOverlay = image; 
 
 
 }

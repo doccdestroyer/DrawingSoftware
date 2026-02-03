@@ -20,9 +20,9 @@ class BucketTool : public QWidget
 
 public:
     explicit BucketTool(QWidget* parent = nullptr);
-    //void zoomIn();
-    //void zoomOut();
-    //void resetZoom();
+    void zoomIn();
+    void zoomOut();
+    void resetZoom();
     //void undo();
     //void redo();
     LayerManager* layerManager;
@@ -43,9 +43,9 @@ public:
 
 protected:
     //void tabletEvent(QTabletEvent* event) override;
-    //void keyPressEvent(QKeyEvent* event) override;
-    //void keyReleaseEvent(QKeyEvent* event) override;
-    //void applyZoom(float zoomAmount);
+    void keyPressEvent(QKeyEvent* event) override;
+    void keyReleaseEvent(QKeyEvent* event) override;
+    void applyZoom(float zoomAmount);
 
     //QPoint getScaledPoint(QPoint pos);
     //QPointF getScaledPointF(QPointF pos);
@@ -59,6 +59,11 @@ protected:
 
 signals:
     void lassoEnabled();
+    void brushEnabled();
+
+    void bucketDisabled();
+
+
 
 private slots:
     //void changeToLasso();

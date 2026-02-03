@@ -26,8 +26,15 @@ public:
     QDockWidget* dock;
 
 signals:
+    //void disbaleAllTools();
+
     void brushEnabled();
     void lassoEnabled();
+    void bucketEnabled();
+
+    void brushDisabled();
+    void lassoDisabled();
+    void bucketDisabled();
 
 private:
     QIcon icon;
@@ -39,8 +46,11 @@ private:
 
     void enableBrushTool();
     void enableLassoTool();
+    void enableBucketTool();
+
+    void disableTool();
 
 
 
-    //std::string selectedTool;
+    std::string selectedTool;
 };

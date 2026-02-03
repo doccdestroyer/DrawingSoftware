@@ -38,6 +38,7 @@ private:
 
     void disableLassoTool();
     void disableBrushTool();
+    void disableBucketTool();
 
     void createDockWindows();
 

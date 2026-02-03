@@ -23,8 +23,8 @@ BrushTool::BrushTool(QWidget* parent)
 
     background = QImage(1100, 1100, QImage::Format_ARGB32_Premultiplied);
     image = background;
-    //image.fill(Qt::transparent);
-    //originalImage = image;
+    image.fill(Qt::transparent);
+    originalImage = image;
     //background.fill(Qt::white);
     //layers = { background, image };
 
@@ -68,11 +68,17 @@ BrushTool::BrushTool(QWidget* parent)
             layers.removeAt(layerIndex);
             pushUndo(layers);
 
-            if (layers.count() == 0) {
+            if (layers.count() == 0 || selectedLayerIndex - 1 < 0) {
                 selectedLayerIndex = 0;
+            }
+            else 
+            {
+                selectedLayerIndex -= 1;
             }
             layerManager->update();
             update();
+
+            qDebug() << "AFTER DELETION THE CURRENT LAYER INDEX IS EQUAL TO: " << selectedLayerIndex;
         });
 
 
@@ -138,6 +144,8 @@ void BrushTool::tabletEvent(QTabletEvent* event)
         qreal pressure = event->pressure();
         xTilt = event->xTilt();
         yTilt = event->yTilt();
+
+        qDebug() << "TOTAL LAYERS: " << layers.count() << "CURRENT LAYER: " << selectedLayerIndex;
 
         QPainter painter(&layers[selectedLayerIndex]);
 
@@ -362,7 +370,7 @@ void BrushTool::mouseMoveEvent(QMouseEvent* event)
 {
 
     if (usingTablet == true) return;
-    if (layers.count() < 1) return;
+    if (layers.count() < 0) return;
     if (isPanning)
     {
         if (!lastPanPoint.isNull()) {
@@ -376,8 +384,13 @@ void BrushTool::mouseMoveEvent(QMouseEvent* event)
         if (drawing && (event->buttons() & Qt::LeftButton)) {
             QPoint currentPoint = mapToImage(getScaledPoint(event->pos()));
 
+
+            qDebug() << "TOTAL LAYERS: " << layers.count() << " SELECTED LAYER INDEX: " << selectedLayerIndex;
             QPainter painter(&layers[selectedLayerIndex]);
 
+            if (!painter.isActive()) {
+                qDebug() << "lol";
+            }
             painter.setRenderHint(QPainter::Antialiasing, true);
             if (isErasing) {
                 painter.setCompositionMode(QPainter::CompositionMode_Clear);
@@ -530,6 +543,7 @@ void BrushTool::redo()
 
 void BrushTool::drawStroke(QPainter& p, const QPointF& from, const QPointF& to, qreal pressure)
 {
+    qDebug() << selectedLayerIndex;
     QLineF line(from, to);
     qreal dist = line.length();
     qreal spacing = 50;

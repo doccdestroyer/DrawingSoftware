@@ -77,6 +77,97 @@ BucketTool::BucketTool(QWidget* parent)
 
 }
 
+
+void BucketTool::applyZoom(float zoomAmount)
+{
+
+    if (1 <= zoomPercentage * zoomAmount <= 12800)
+    {
+        zoomPercentage = zoomPercentage * zoomAmount;
+    }
+    else if (zoomPercentage < 1) { zoomPercentage = 1; }
+    else { zoomPercentage = 12800; }
+    //QPointF hoverFromCenter = rect().center() + hoverPoint;
+    repaint();
+    update();
+
+}
+
+void BucketTool::zoomIn()
+{
+    applyZoom((1.111));
+}
+
+void BucketTool::zoomOut()
+{
+    applyZoom((0.9));
+}
+
+void BucketTool::resetZoom()
+{
+    zoomPercentage = 100.0;
+    applyZoom(1);
+}
+
+void BucketTool::keyPressEvent(QKeyEvent* event)
+{
+
+    if (event->key() == 61 && event->modifiers() & Qt::ControlModifier)
+        zoomIn();
+    if (event->key() == 45 && event->modifiers() & Qt::ControlModifier)
+        zoomOut();
+
+    if (event->key() == Qt::Key_0 && event->modifiers() & Qt::ControlModifier)
+        resetZoom();
+
+    if (event->key() == Qt::Key_Z && event->modifiers() & Qt::ControlModifier)
+    {
+        //undo();
+        //layerManager->undo();
+    }
+
+    if (event->key() == Qt::Key_Y && event->modifiers() & Qt::ControlModifier)
+    {
+        //redo();
+        //layerManager->redo();
+    }
+
+    if (event->key() == Qt::Key_Space)
+    {
+        panningEnabled = true;
+        setCursor(Qt::OpenHandCursor);
+    }
+
+
+
+    if (event->key() == Qt::Key_L)
+    {
+        emit bucketDisabled();
+        emit lassoEnabled();
+    }
+
+    if (event->key() == Qt::Key_B)
+    {
+        emit bucketDisabled();
+        emit brushEnabled();
+    }
+}
+
+
+void BucketTool::keyReleaseEvent(QKeyEvent* event)
+{
+    if (event->isAutoRepeat())
+    {
+        return;
+    }
+    if (event->key() == Qt::Key_Space)
+    {
+        lastPanPoint = QPoint();
+        panningEnabled = false;
+        setCursor(Qt::ArrowCursor);
+    }
+}
+
 void BucketTool::paintEvent(QPaintEvent* event)
 {
     QPainter painter(this);
