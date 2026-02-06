@@ -11,14 +11,16 @@
 
 #include <ColourWindow.h>
 #include "LayerManager.h"
+#include <UIManager.h>
 
+class UIManager;
 
 class BrushTool : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit BrushTool(QWidget* parent = nullptr);
+    explicit BrushTool(UIManager* ui, QWidget* parent = nullptr);
     void zoomIn();
     void zoomOut();
     void resetZoom();
@@ -26,6 +28,14 @@ public:
     void redo();
     LayerManager* layerManager;
     ColourWindow* colourWindow;
+
+    //UIManager* uiManager;
+
+
+
+    /// ////////////////
+    void ReturnColour(UIManager& ui);
+
 
     QVector<QImage> layers;
     QImage overlay;
@@ -58,10 +68,15 @@ signals:
     void lassoEnabled();
     void bucketEnabled();
 
+
+
 private slots:
     //void changeToLasso();
 
 private:
+
+    UIManager* uiManager;
+
     bool panningEnabled = false;
     bool isPanning = false;
     QPoint lastPanPoint;
@@ -117,5 +132,7 @@ private:
     void drawBrush(QPainter& p, const QPointF& pos, qreal pressure);
     QImage adjustBrushColour(const QImage& brush, const QColor& color);
 };
+
+
 
 

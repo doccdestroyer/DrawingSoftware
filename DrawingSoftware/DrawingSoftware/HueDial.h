@@ -8,7 +8,7 @@
 
 
 class HueDial : public QDial
-    
+
 {
 
     //signals:
@@ -19,7 +19,7 @@ public:
     float getSaturation() const;
     float getLightness() const;
 
-signals: 
+signals:
     void hueDialAngle(float angle);
 
 
@@ -37,6 +37,8 @@ private:
     QPointF p2;
     QPointF p3;
     QPointF offset;
+
+    QColor currentColour;
 
 protected:
 
@@ -64,3 +66,4 @@ protected:
 
     void paintEvent(QPaintEvent* event) override;
 };
+

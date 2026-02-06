@@ -6,9 +6,8 @@
 #include<HueDial.h>
 
 
-
-BrushTool::BrushTool(QWidget* parent)
-    : QWidget(parent)
+BrushTool::BrushTool(UIManager* ui, QWidget* parent)
+    : QWidget(parent), uiManager(ui)
 {
     //setWindowTitle("Bad Apple");
     //setFixedSize(1920, 1080);
@@ -16,6 +15,8 @@ BrushTool::BrushTool(QWidget* parent)
     setAttribute(Qt::WA_TabletTracking);
     setAttribute(Qt::WA_MouseTracking);
     setMouseTracking(true);
+    //QStack<QVector<QImage>> undoLayerStack;
+    //QStack<QVector<QImage>> redoLayerStack;
     setFocusPolicy(Qt::StrongFocus);
 
 
@@ -23,8 +24,8 @@ BrushTool::BrushTool(QWidget* parent)
 
     background = QImage(1100, 1100, QImage::Format_ARGB32_Premultiplied);
     image = background;
-    image.fill(Qt::transparent);
-    originalImage = image;
+    //image.fill(Qt::transparent);
+    //originalImage = image;
     //background.fill(Qt::white);
     //layers = { background, image };
 
@@ -32,16 +33,40 @@ BrushTool::BrushTool(QWidget* parent)
 
     brushOutline = QImage(QDir::currentPath() + "/Images/ChalkRot_Outline.png");
 
-    colourWindow = new ColourWindow(this);
+    //uiManager = new UIManager(this);
+
+    colourWindow = ui->colourWindow;
     //colourWindow->show();
 
-    layerManager = new LayerManager(this);
-    //layerManager->show();
 
-    layers = layerManager->layers;
-    undoStack.push(layers);
+
+
+    uiManager = ui;
+    //undoStack.push(layers);
+
+
+    layerManager = uiManager->undoManager->layerManager;
 
     overlay = layerManager->selectionOverlay;
+
+    layers = layerManager->layers;
+
+
+    //layerManager->show();
+    uiManager->undoManager->undoLayerStack.push(layers);
+    layerManager->layers = layers;
+    layerManager->update();
+
+
+
+
+    connect(colourWindow, &ColourWindow::colourChanged,
+        this, [=](QColor newColor)
+        {
+            colour = newColor;
+        });
+
+
 
     connect(layerManager, &LayerManager::layerSelected,
         this, [=](const QString& layerName, int layerIndex) {
@@ -53,7 +78,12 @@ BrushTool::BrushTool(QWidget* parent)
         this, [=](int layerIndex) {
 
             layers.insert(layerIndex, originalImage);
-            pushUndo(layers);
+
+
+            uiManager->undoManager->pushUndo(layers);
+
+
+            // pushUndo(layers);
             layerManager->update();
             update();
         });
@@ -66,19 +96,15 @@ BrushTool::BrushTool(QWidget* parent)
             }
 
             layers.removeAt(layerIndex);
-            pushUndo(layers);
+            //pushUndo(layers);
+            uiManager->undoManager->pushUndo(layers);
 
-            if (layers.count() == 0 || selectedLayerIndex - 1 < 0) {
+
+            if (layers.count() == 0) {
                 selectedLayerIndex = 0;
-            }
-            else 
-            {
-                selectedLayerIndex -= 1;
             }
             layerManager->update();
             update();
-
-            qDebug() << "AFTER DELETION THE CURRENT LAYER INDEX IS EQUAL TO: " << selectedLayerIndex;
         });
 
 
@@ -86,6 +112,9 @@ BrushTool::BrushTool(QWidget* parent)
 }
 
 
+void BrushTool::ReturnColour(UIManager& ui) {
+    //colour = ui.colourWindow->updateColour();
+}
 
 
 void BrushTool::tabletEvent(QTabletEvent* event)
@@ -104,7 +133,8 @@ void BrushTool::tabletEvent(QTabletEvent* event)
             if (!isErasing)
             {
                 // FIX ME
-                colour = colourWindow->updateColour();
+                //colour = colourWindow->updateColour();
+                //ReturnColour(*uiManager);
                 //colour = QColor::fromHsl(0, 0, 0);
 
 
@@ -145,8 +175,6 @@ void BrushTool::tabletEvent(QTabletEvent* event)
         xTilt = event->xTilt();
         yTilt = event->yTilt();
 
-        qDebug() << "TOTAL LAYERS: " << layers.count() << "CURRENT LAYER: " << selectedLayerIndex;
-
         QPainter painter(&layers[selectedLayerIndex]);
 
         painter.setRenderHint(QPainter::Antialiasing, true);
@@ -172,8 +200,14 @@ void BrushTool::tabletEvent(QTabletEvent* event)
         lastPointF = currentPoint;
         drawing = false;
         usingTablet = true;
-        pushUndo(layers);
-        redoStack.clear();
+        //pushUndo(layers);
+
+        uiManager->undoManager->pushUndo(layers);
+
+        uiManager->undoManager->redoLayerStack.clear();
+        layerManager->update();
+
+        update();
     }
 
     event->accept();
@@ -191,14 +225,20 @@ void BrushTool::keyPressEvent(QKeyEvent* event)
 
     if (event->key() == Qt::Key_Z && event->modifiers() & Qt::ControlModifier)
     {
-        undo();
-        layerManager->undo();
+        //layerManager->undo();
+        uiManager->undoManager->undo();
+        layers = layerManager->layers;
+        update();
     }
 
     if (event->key() == Qt::Key_Y && event->modifiers() & Qt::ControlModifier)
     {
-        redo();
-        layerManager->redo();
+        //redo();
+        //layerManager->redo();
+        uiManager->undoManager->redo();
+        layers = layerManager->layers;
+        update();
+
     }
 
     if (event->key() == Qt::Key_Space)
@@ -358,7 +398,9 @@ void BrushTool::mousePressEvent(QMouseEvent* event)
             {
                 // FIX ME 
                 //colour = QColor::fromHsl(0, 0, 0);
-                colour = colourWindow->updateColour();
+                //colour = colourWindow->updateColour();
+                //ReturnColour(*uiManager);
+
             }
             brush = adjustBrushColour(brush, colour);
         }
@@ -370,7 +412,7 @@ void BrushTool::mouseMoveEvent(QMouseEvent* event)
 {
 
     if (usingTablet == true) return;
-    if (layers.count() < 0) return;
+    if (layers.count() < 1) return;
     if (isPanning)
     {
         if (!lastPanPoint.isNull()) {
@@ -379,18 +421,13 @@ void BrushTool::mouseMoveEvent(QMouseEvent* event)
             lastPanPoint = event->pos();
         }
     }
-    else 
+    else
     {
         if (drawing && (event->buttons() & Qt::LeftButton)) {
             QPoint currentPoint = mapToImage(getScaledPoint(event->pos()));
 
-
-            qDebug() << "TOTAL LAYERS: " << layers.count() << " SELECTED LAYER INDEX: " << selectedLayerIndex;
             QPainter painter(&layers[selectedLayerIndex]);
 
-            if (!painter.isActive()) {
-                qDebug() << "lol";
-            }
             painter.setRenderHint(QPainter::Antialiasing, true);
             if (isErasing) {
                 painter.setCompositionMode(QPainter::CompositionMode_Clear);
@@ -407,7 +444,7 @@ void BrushTool::mouseMoveEvent(QMouseEvent* event)
             delayCounter = 0;
         }
     }
-    
+
     update();
 }
 
@@ -422,14 +459,18 @@ void BrushTool::mouseReleaseEvent(QMouseEvent* event)
 
     if (event->button() == Qt::LeftButton) {
         drawing = false;
-        pushUndo(layers);
-        redoStack.clear();
+
+        uiManager->undoManager->pushUndo(layers);
+        layerManager->layers = layers;
+        uiManager->undoManager->redoLayerStack.clear();
+        update();
     }
 
 }
 
 void BrushTool::paintEvent(QPaintEvent* event)
 {
+
     QPainter painter(this);
     QPoint center = rect().center();
     QPoint hoverOffset = center - hoverPoint.toPoint();
@@ -478,7 +519,7 @@ void BrushTool::paintEvent(QPaintEvent* event)
         painter.drawImage(drawPos, brushHover);
     }
 }
-    
+
 
 
 
@@ -500,8 +541,8 @@ void BrushTool::removeLayer(int layer)
 
 void BrushTool::pushUndo(const QVector<QImage>& layers)
 {
-    undoStack.push(layers);
-    if (undoStack.size() > 50) undoStack.remove(0);
+    //undoStack.push(layers);
+    //if (undoStack.size() > 50) undoStack.remove(0);
 }
 
 QPoint BrushTool::mapToImage(const QPoint& p)
@@ -525,25 +566,24 @@ QPointF BrushTool::mapToImageF(const QPointF& p)
 
 void BrushTool::undo()
 {
-    if (undoStack.size() <= 1) return;
-    redoStack.push(undoStack.pop());
-    layers = undoStack.top();
-    layerManager->undo();
-    update();
+    //if (undoStack.size() <= 1) return;
+    //redoStack.push(undoStack.pop());
+    //layers = undoStack.top();
+    //layerManager->undo();
+    //update();
 }
 
 void BrushTool::redo()
 {
-    if (redoStack.isEmpty()) return;
-    layers = redoStack.pop();
-    undoStack.push(layers);
-    layerManager->redo();
-    update();
+    //if (redoStack.isEmpty()) return;
+    //layers = redoStack.pop();
+    //undoStack.push(layers);
+    //layerManager->redo();
+    //update();
 }
 
 void BrushTool::drawStroke(QPainter& p, const QPointF& from, const QPointF& to, qreal pressure)
 {
-    qDebug() << selectedLayerIndex;
     QLineF line(from, to);
     qreal dist = line.length();
     qreal spacing = 50;
@@ -653,6 +693,8 @@ QImage BrushTool::adjustBrushColour(const QImage& brush, const QColor& color)
 
     return coloured;
 };
+
+
 
 
 

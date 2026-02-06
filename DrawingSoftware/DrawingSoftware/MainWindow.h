@@ -7,6 +7,7 @@
 #include <BrushTool.h>
 #include <LassoTool.h>
 #include <BucketTool.h>
+#include <UIManager.h>
 #include <QDockWidget>
 #include <ToolSelectionMenu.h>
 #include <QHBoxLayout>
@@ -18,7 +19,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow();
-    void keyPressEvent(QKeyEvent * event);
+    void keyPressEvent(QKeyEvent* event);
     int TESTVARIABLE = 69;
     QDockWidget* dock;
 
@@ -31,7 +32,8 @@ private:
     LassoTool* lassoTool = nullptr;
     BucketTool* bucketTool = nullptr;
     ToolSelectionMenu* toolSelectionMenu = nullptr;
- 
+    UIManager* uiManager = nullptr;
+
     void enableBucketTool();
     void enableBrushTool();
     void enableLassoTool();
@@ -44,3 +46,4 @@ private:
 
     QWidget currentTool;
 };
+

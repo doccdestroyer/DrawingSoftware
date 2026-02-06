@@ -1,5 +1,5 @@
 #include "BucketTool.h"
-#include <LayerManager.h>
+#include "BrushTool.h"
 
 
 
@@ -7,8 +7,8 @@
 
 
 
-BucketTool::BucketTool(QWidget* parent)
-    : QWidget(parent)
+BucketTool::BucketTool(UIManager* ui, QWidget* parent)
+    : QWidget(parent), uiManager(ui)
 {
     //setWindowTitle("Bad Apple");
     //setFixedSize(1920, 1080);
@@ -31,15 +31,23 @@ BucketTool::BucketTool(QWidget* parent)
     //brush = QImage(QDir::currentPath() + "/Images/ChalkRot.png");
 
     //brushOutline = QImage(QDir::currentPath() + "/Images/ChalkRot_Outline.png");
+    //uiManager = new UIManager(this);
 
-    colourWindow = new ColourWindow(this);
+    colourWindow = ui->colourWindow;
+    uiManager = ui;
 
-    layerManager = new LayerManager(this);
-
+    layerManager = uiManager->undoManager->layerManager;
     layers = layerManager->layers;
-    //undoStack.push(layers);
 
     overlay = layerManager->selectionOverlay;
+
+
+    connect(colourWindow, &ColourWindow::colourChanged,
+        this, [=](QColor newColor)
+        {
+            colour = newColor;
+        });
+
 
     connect(layerManager, &LayerManager::layerSelected,
         this, [=](const QString& layerName, int layerIndex) {
@@ -122,14 +130,16 @@ void BucketTool::keyPressEvent(QKeyEvent* event)
 
     if (event->key() == Qt::Key_Z && event->modifiers() & Qt::ControlModifier)
     {
-        //undo();
-        //layerManager->undo();
+        uiManager->undoManager->undo();
+        layers = layerManager->layers;
+        update();
     }
 
     if (event->key() == Qt::Key_Y && event->modifiers() & Qt::ControlModifier)
     {
-        //redo();
-        //layerManager->redo();
+        uiManager->undoManager->redo();
+        layers = layerManager->layers;
+        update();
     }
 
     if (event->key() == Qt::Key_Space)
@@ -178,6 +188,8 @@ void BucketTool::paintEvent(QPaintEvent* event)
     painter.scale(zoomPercentage / 100, zoomPercentage / 100);
     painter.translate(panOffset / (zoomPercentage / 100.0));
 
+    qDebug() << panOffset;
+
     painter.setRenderHint(QPainter::SmoothPixmapTransform, false);
     painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
 
@@ -224,54 +236,95 @@ void BucketTool::mousePressEvent(QMouseEvent* event)
         {
             QPoint point = mapToImage(event->pos());
 
-            QImage currentImage = layers[selectedLayerIndex];
-
-            QColor basePixelColor = QColor(currentImage.pixel(point.x(), point.y()));
-
-            qDebug() << basePixelColor;
-
-            QColor TEST = QColor(qRgb(255, 0, 0));
-
-            //dfs(currentImage, point.x(), point.y(), basePixelColor, TEST);
-            layers[selectedLayerIndex] = fill(currentImage, point.x(), point.y(), basePixelColor, TEST);
-            qDebug() << selectedLayerIndex;
 
 
+            if (selectionsPath.length() > 0)
+            {
+                QVector<QPainterPath> newPath = selectionsPath;
+                QPolygonF imagePolygon = QPolygon(image.rect());
+                QPainterPath imagePath;
+                imagePath.addPolygon(imagePolygon);
+
+                bool changed = false;
+                for (int i = 0; i < selectionsPath.length(); ++i)
+                {
+
+                    QPainterPath& path = newPath[i];
+                    QPainterPath subtractionPath = imagePath.subtracted(path);
+                    newPath[i] = subtractionPath;
+
+                    newPath[i] = (subtractionPath != path) ? subtractionPath : path;  // One-liner fix here
+                    changed = (subtractionPath != path);
+                    changed = true;
+                    while (changed)
+                    {
+                        changed = false;
+                        for (int k = 0; k < newPath.length(); ++k)
+                        {
+                            QPainterPath& otherPath = newPath[k];
+                            if (k == i) continue;
+                            if (newPath[i].intersects(otherPath))
+                            {
+                                QPainterPath newSubtraction = newPath[i].subtracted(otherPath);
+                                if (newSubtraction != newPath[i]) {
+                                    newPath[i] = newSubtraction;
+                                    changed = true;
+                                }
+                            }
+                        }
+                    }
+                }
+                QPainterPath clipPath = imagePath.subtracted(newPath[0]);
+
+                if (clipPath.contains(point))
+                {
+                    qDebug() << "path contained";
+                    QImage currentImage = layers[selectedLayerIndex];
+
+                    QColor basePixelColor = QColor(currentImage.pixel(point.x(), point.y()));
 
 
-            //for (int pixelY = 0; pixelY < currentImage.height(); pixelY++)
-            //{
-            //    for (int pixelX = 0; pixelX < currentImage.width(); pixelX++)
-            //    {
+                    layers[selectedLayerIndex] = fill(currentImage, point.x(), point.y(), basePixelColor, colour);
 
-            //    }
-            //}
+                }
+            }
+            else
+            {
+                QImage currentImage = layers[selectedLayerIndex];
+
+                QColor basePixelColor = QColor(currentImage.pixel(point.x(), point.y()));
+
+                layers[selectedLayerIndex] = fill(currentImage, point.x(), point.y(), basePixelColor, colour);
+            }
+
+        }
+    }
+    uiManager->undoManager->pushUndo(layers);
+    layerManager->layers = layers;
+    uiManager->undoManager->redoLayerStack.clear();
+    update();
+
+}
+void BucketTool::mouseMoveEvent(QMouseEvent* event)
+{
+    if (isPanning)
+    {
+        if (!lastPanPoint.isNull()) {
+            QPoint change = event->position().toPoint() - lastPanPoint;
+            panOffset += change;
+            lastPanPoint = event->position().toPoint();
+            update();
+
         }
     }
 }
 
-
-
-//void BucketTool::dfs(QImage image, int pixelX, int pixelY, const QColor oldColor, const QColor newColor)
-//{
-//    if (oldColor == newColor)
-//        return;
-//    if (pixelX < 0 || pixelX >= image.width() || pixelY < 0 || pixelY >= image.height() || QColor(image.pixel(pixelX, pixelY)) != oldColor)
-//    {
-//        return;
-//    }
-//    else
-//    {
-//        image.setPixelColor(pixelX, pixelY, newColor);
-//        dfs(image, pixelX + 1, pixelY, oldColor, newColor);
-//        dfs(image, pixelX - 1, pixelY, oldColor, newColor);
-//        dfs(image, pixelX, pixelY + 1, oldColor, newColor);
-//        dfs(image, pixelX, pixelY - 1, oldColor, newColor);
-//    }
-//
-//
-//}
-
+void BucketTool::mouseReleaseEvent(QMouseEvent* event)
+{
+    if (isPanning) {
+        isPanning = false;
+    }
+}
 
 QImage BucketTool::fill(QImage& image, int startX, int startY,
     const QColor& oldColor, const QColor& newColor)
@@ -298,74 +351,34 @@ QImage BucketTool::fill(QImage& image, int startX, int startY,
         if (image.pixel(x, y) != target)
             continue;
 
-        image.setPixel(x, y, replacement);
 
-        stack.push(QPoint(x + 1, y));
-        stack.push(QPoint(x - 1, y));
-        stack.push(QPoint(x, y + 1));
-        stack.push(QPoint(x, y - 1));
+        if (selectionsPath.length() > 0)
+        {
+            for (int pathNum = 0; pathNum < selectionsPath.count(); pathNum++)
+            {
+                if (selectionsPath[pathNum].contains(QPoint(x, y)))
+                {
+                    image.setPixel(x, y, replacement);
+
+                    stack.push(QPoint(x + 1, y));
+                    stack.push(QPoint(x - 1, y));
+                    stack.push(QPoint(x, y + 1));
+                    stack.push(QPoint(x, y - 1));
+                }
+            }
+        }
+        else
+        {
+            image.setPixel(x, y, replacement);
+
+            stack.push(QPoint(x + 1, y));
+            stack.push(QPoint(x - 1, y));
+            stack.push(QPoint(x, y + 1));
+            stack.push(QPoint(x, y - 1));
+        }
+
     }
     return image;
 }
 
-
-//#include <iostream>
-//#include <vector>
-//using namespace std;
-//
-//void dfs(vector<vector<int>>& img, int x,
-//    int y, int oldColor, int newColor) {
-//
-//    if (x < 0 || x >= img.size() ||
-//        y < 0 || y >= img[0].size() || img[x][y] != oldColor) {
-//        return;
-//    }
-//
-//    // Update the color of the current pixel
-//    img[x][y] = newColor;
-//
-//    // Recursively visit all 4 connected neighbors
-//    dfs(img, x + 1, y, oldColor, newColor);
-//    dfs(img, x - 1, y, oldColor, newColor);
-//    dfs(img, x, y + 1, oldColor, newColor);
-//    dfs(img, x, y - 1, oldColor, newColor);
-//}
-//
-//vector<vector<int>> floodFill(vector<vector<int>>& img, int sr,
-//    int sc, int newColor) {
-//
-//    // If the starting pixel already has the new color,
-//    // no changes are needed
-//    if (img[sr][sc] == newColor) {
-//        return img;
-//    }
-//
-//    // Call DFS to start filling from the source pixel
-//     // Store original color
-//    int oldColor = img[sr][sc];
-//    dfs(img, sr, sc, oldColor, newColor);
-//
-//    return img;
-//}
-//
-//int main() {
-//    vector<vector<int>> img = {
-//        {1, 1, 1, 0},
-//        {0, 1, 1, 1},
-//        {1, 0, 1, 1}
-//    };
-//
-//    int sr = 1, sc = 2;
-//
-//    int newColor = 2;
-//
-//    vector<vector<int>> result = floodFill(img, sr, sc, newColor);
-//
-//    for (auto& row : result) {
-//        for (auto& pixel : row) {
-//            cout << pixel << " ";
-//        }
-//    }
-//    return 0;
-//}
 

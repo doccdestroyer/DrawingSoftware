@@ -29,7 +29,7 @@ void ToolSelectionMenu::createToolBar()
 	brushAction->setStatusTip(tr("&Brush Tool"));;
 	connect(brushAction, &QAction::triggered, this, [&]() {
 		enableBrushTool();
-		});	
+		});
 	toolBar->addAction(brushAction);
 
 
@@ -94,4 +94,5 @@ void ToolSelectionMenu::enableBucketTool()
 	selectedTool = "Bucket";
 
 }
+
 

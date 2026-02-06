@@ -13,19 +13,30 @@ ColourWindow::ColourWindow(QWidget* parent) : QWidget(parent)
         this, [=](int angle)
         {
             angle = angle;
+            updateColour();
         });
+
 }
 
 int ColourWindow::hueAngle()
 {
     angle = dial->value();
+    currentColour = updateColour();
+    emit colourChanged(currentColour);
+
     return dial->value();
 }
 
-QColor ColourWindow::updateColour() const
+QColor ColourWindow::updateColour()
 {
     float saturation = dial->getSaturation();
     float lightness = dial->getLightness();
+
+    QColor newColor = QColor::fromHsl(360 - angle, int(saturation * 255), int(lightness * 255));
+    currentColour = newColor;
+
+    emit colourChanged(currentColour);
+
     return QColor::fromHsl(360 - angle, int(saturation * 255), int(lightness * 255));
 }
 
@@ -42,14 +53,14 @@ void ColourWindow::createWheel()
     int angle = dial->value();
 }
 
-void ColourWindow::mousePressEvent(QMouseEvent* event)
-{
-    QPointF clickPosition = QPointF(event->pos());
-    if (windowArea.contains(clickPosition)) {
-    }
-    else {
-    }
-}
+//void ColourWindow::mousePressEvent(QMouseEvent* event)
+//{
+//    QPointF clickPosition = QPointF(event->pos());
+//    if (windowArea.contains(clickPosition)) {
+//    }
+//    else {
+//    }
+//}
 
 void ColourWindow::paintEvent(QPaintEvent*)
 {
@@ -143,3 +154,5 @@ void ColourWindow::paintEvent(QPaintEvent*)
 
 
 }
+
+

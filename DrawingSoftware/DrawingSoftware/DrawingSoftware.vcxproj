@@ -101,6 +101,8 @@
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
     </ClCompile>
+    <ClCompile Include="UIManager.cpp" />
+    <ClCompile Include="UndoManager.cpp" />
     <QtRcc Include="DrawingSoftware.qrc" />
     <QtUic Include="DrawingSoftware.ui" />
     <QtMoc Include="DrawingSoftware.h" />
@@ -112,12 +114,14 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="UIManager.h" />
+    <ClInclude Include="UndoManager.h" />
     <QtMoc Include="ToolSelectionMenu.h" />
     <QtMoc Include="LassoTool.h" />
     <QtMoc Include="MainWindow.h" />
     <QtMoc Include="BrushTool.h" />
     <QtMoc Include="BucketTool.h" />
-    <ClInclude Include="ColourWindow.h" />
+    <QtMoc Include="ColourWindow.h" />
     <QtMoc Include="HueDial.h" />
     <QtMoc Include="LayerManager.h" />
   </ItemGroup>

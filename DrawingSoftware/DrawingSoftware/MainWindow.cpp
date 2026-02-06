@@ -3,118 +3,123 @@
 
 MainWindow::MainWindow()
 {
-        setWindowTitle("Bad Apple");
-        setFixedSize(1440, 720);
-        setStyleSheet("background-color: rgb(30,30,30);");
-        setAttribute(Qt::WA_TabletTracking);
-        setAttribute(Qt::WA_MouseTracking);
-        setMouseTracking(true);
+    setWindowTitle("Bad Apple");
+    setFixedSize(1440, 720);
+    setStyleSheet("background-color: rgb(30,30,30);");
+    setAttribute(Qt::WA_TabletTracking);
+    setAttribute(Qt::WA_MouseTracking);
+    setMouseTracking(true);
 
-        //setFocusPolicy(Qt::StrongFocus);
-
-
-        //pngBackground = QImage(QDir::currentPath() + "/Images/PNGBackground.png");
-
-        //background = QImage(1100, 1100, QImage::Format_ARGB32_Premultiplied);
-        //image = background;
-        //image.fill(Qt::transparent);
-        //originalImage = image;
-        //background.fill(Qt::white);
-        //layers = { background, image };
-
-        //undoStack.push(layers);
-        //brush = QImage(QDir::currentPath() + "/Images/ChalkRot.png");
-
-        //brushOutline = QImage(QDir::currentPath() + "/Images/ChalkRot_Outline.png");
-        brushTool = new BrushTool(this);
-        lassoTool = new LassoTool(this);
-        bucketTool = new BucketTool(this);
-
-        toolSelectionMenu = new ToolSelectionMenu(this);
+    //setFocusPolicy(Qt::StrongFocus);
 
 
-        colourWindow = brushTool->colourWindow;
-        //colourWindow->show();
+    //pngBackground = QImage(QDir::currentPath() + "/Images/PNGBackground.png");
 
-        layerManager = brushTool->layerManager;
-        //layerManager->show();
+    //background = QImage(1100, 1100, QImage::Format_ARGB32_Premultiplied);
+    //image = background;
+    //image.fill(Qt::transparent);
+    //originalImage = image;
+    //background.fill(Qt::white);
+    //layers = { background, image };
 
-        //toolSelectionMenu->show();
-        createDockWindows();
+    //undoStack.push(layers);
+    //brush = QImage(QDir::currentPath() + "/Images/ChalkRot.png");
 
+    //brushOutline = QImage(QDir::currentPath() + "/Images/ChalkRot_Outline.png");
+    uiManager = new UIManager(this);
 
+    brushTool = new BrushTool(uiManager, this);
+    lassoTool = new LassoTool(uiManager, this);
+    bucketTool = new BucketTool(uiManager, this);
 
-        connect(brushTool, &BrushTool::brushDisabled,
-            this, [&]()
-            {
-                disableBrushTool();
-            });
-
-        connect(lassoTool, &LassoTool::lassoDisabled,
-            this, [&]()
-            {
-                disableLassoTool();
-            });
-        connect(bucketTool, &BucketTool::bucketDisabled,
-            this, [&]()
-            {
-                disableBucketTool();
-            });
+    toolSelectionMenu = new ToolSelectionMenu(this);
 
 
 
 
-        connect(brushTool, &BrushTool::lassoEnabled,
-            this, [&]()
-            {
-                enableLassoTool();
-            });
-        connect(brushTool, &BrushTool::bucketEnabled,
-            this, [&]()
-            {
-                enableBucketTool();
-            });
-        connect(lassoTool, &LassoTool::brushEnabled,
-            this, [&]()
-            {
-                enableBrushTool();
-            });
+    colourWindow = uiManager->colourWindow;
+    //colourWindow = brushTool->colourWindow;
+    //colourWindow->show();
+
+    layerManager = brushTool->layerManager;
+    //layerManager->show();
+
+    //toolSelectionMenu->show();
+    createDockWindows();
 
 
-        connect(toolSelectionMenu, &ToolSelectionMenu::brushEnabled,
-            this, [&]()
-            {
-                enableBrushTool();
-            });
-        connect(toolSelectionMenu, &ToolSelectionMenu::lassoEnabled,
-            this, [&]()
-            {
-                enableLassoTool();
-            });
-        connect(toolSelectionMenu, &ToolSelectionMenu::bucketEnabled,
-            this, [&]()
-            {
-                enableBucketTool();
-            });
 
-        connect(toolSelectionMenu, &ToolSelectionMenu::brushDisabled,
-            this, [&]()
-            {
-                disableBrushTool();
-            });
-        connect(toolSelectionMenu, &ToolSelectionMenu::lassoDisabled,
-            this, [&]()
-            {
-                disableLassoTool();
-            });
-        connect(toolSelectionMenu, &ToolSelectionMenu::bucketDisabled,
-            this, [&]()
-            {
-                disableBucketTool();
-            });
+    connect(brushTool, &BrushTool::brushDisabled,
+        this, [&]()
+        {
+            disableBrushTool();
+        });
+
+    connect(lassoTool, &LassoTool::lassoDisabled,
+        this, [&]()
+        {
+            disableLassoTool();
+        });
+    connect(bucketTool, &BucketTool::bucketDisabled,
+        this, [&]()
+        {
+            disableBucketTool();
+        });
 
 
-    }
+
+
+    connect(brushTool, &BrushTool::lassoEnabled,
+        this, [&]()
+        {
+            enableLassoTool();
+        });
+    connect(brushTool, &BrushTool::bucketEnabled,
+        this, [&]()
+        {
+            enableBucketTool();
+        });
+    connect(lassoTool, &LassoTool::brushEnabled,
+        this, [&]()
+        {
+            enableBrushTool();
+        });
+
+
+    connect(toolSelectionMenu, &ToolSelectionMenu::brushEnabled,
+        this, [&]()
+        {
+            enableBrushTool();
+        });
+    connect(toolSelectionMenu, &ToolSelectionMenu::lassoEnabled,
+        this, [&]()
+        {
+            enableLassoTool();
+        });
+    connect(toolSelectionMenu, &ToolSelectionMenu::bucketEnabled,
+        this, [&]()
+        {
+            enableBucketTool();
+        });
+
+    connect(toolSelectionMenu, &ToolSelectionMenu::brushDisabled,
+        this, [&]()
+        {
+            disableBrushTool();
+        });
+    connect(toolSelectionMenu, &ToolSelectionMenu::lassoDisabled,
+        this, [&]()
+        {
+            disableLassoTool();
+        });
+    connect(toolSelectionMenu, &ToolSelectionMenu::bucketDisabled,
+        this, [&]()
+        {
+            disableBucketTool();
+        });
+
+
+}
 
 void MainWindow::disableBrushTool()
 {
@@ -136,10 +141,10 @@ void MainWindow::disableBucketTool()
 
 void MainWindow::disableLassoTool()
 {
-    layerManager->updateLayers(lassoTool->layers, 
-        lassoTool->overlay, 
-        lassoTool->zoomPercentage, 
-        lassoTool->panOffset, 
+    layerManager->updateLayers(lassoTool->layers,
+        lassoTool->overlay,
+        lassoTool->zoomPercentage,
+        lassoTool->panOffset,
         lassoTool->selectionsPath);
 }
 
@@ -228,9 +233,9 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
     //    dock->setWidget(brushTool);
     //    brushTool->layers = layerManager->layers;
     //    brushTool->overlay = layerManager->selectionOverlay;
-   
+
     //    //if (brushType == "chalk") {
-   
+
     //    //    brush = QImage(QDir::currentPath() + "/Images/CircleBrush.png");
     //    //    brushOutline = QImage(QDir::currentPath() + "/Images/CircleBrush_Outline.png");
     //    //    brushType = "circle";
@@ -239,7 +244,7 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
     //    //    brush = QImage(QDir::currentPath() + "/Images/ChalkRot.png");
     //    //    brushTool->brushOutline = QImage(QDir::currentPath() + "/Images/ChalkRot_Outline.png");
     //    //    brushType = "chalk";
-   
+
     //    //}
     //}
 
@@ -270,8 +275,8 @@ void MainWindow::createDockWindows()
     dock->setWidget(layerManager);
     addDockWidget(Qt::RightDockWidgetArea, dock);
 
-    QWidget *centralWidget = new QWidget();
-    QHBoxLayout *layout = new QHBoxLayout(centralWidget);
+    QWidget* centralWidget = new QWidget();
+    QHBoxLayout* layout = new QHBoxLayout(centralWidget);
 
     QDockWidget* ToolDock = new QDockWidget(tr("Tools"), this);
     ToolDock->setWidget(toolSelectionMenu);
@@ -288,3 +293,5 @@ void MainWindow::createDockWindows()
     //addDockWidget(Qt::LeftDockWidgetArea, dock);
 
 }
+
+

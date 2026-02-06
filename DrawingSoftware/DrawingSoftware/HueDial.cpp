@@ -22,6 +22,9 @@ HueDial::HueDial(QWidget* parent) : QDial(parent)
             update();  // repaint when dial moves
             });
 
+
+
+
         QRectF windowArea = rect();
         qreal windowSide = qMin(windowArea.width(), windowArea.height());
 
@@ -228,3 +231,4 @@ void HueDial::paintEvent(QPaintEvent* event)
     p.restore();
 
 }
+

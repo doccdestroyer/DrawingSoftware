@@ -6,6 +6,7 @@
 
 #include<HueDial.h>
 
+
 QPoint LassoTool::mapToImage(const QPoint& p)
 {
     QPoint center = rect().center();
@@ -17,8 +18,8 @@ QPoint LassoTool::mapToImage(const QPoint& p)
     return offsetPoint + QPoint(image.width() / 2.0, image.height() / 2.0);
 }
 
-LassoTool::LassoTool(QWidget* parent)
-    : QWidget(parent)
+LassoTool::LassoTool(UIManager* ui, QWidget* parent)
+    : QWidget(parent), uiManager(ui)
 {
     setAttribute(Qt::WA_TabletTracking);
     setAttribute(Qt::WA_MouseTracking);
@@ -42,6 +43,20 @@ LassoTool::LassoTool(QWidget* parent)
 
     overlay = QImage(image.size(), QImage::Format_ARGB32_Premultiplied);
     overlay.fill(Qt::transparent);
+
+
+
+    uiManager = ui;
+
+    layerManager = uiManager->undoManager->layerManager;
+
+
+
+    overlay = layerManager->selectionOverlay;
+
+    layers = layerManager->layers;
+    layerManager->layers = layers;
+    layerManager->update();
 }
 
 void LassoTool::zoomIn()
@@ -93,14 +108,20 @@ void LassoTool::keyPressEvent(QKeyEvent* event)
 
     if (event->key() == Qt::Key_Z && event->modifiers() & Qt::ControlModifier)
     {
-        //undo();
-        //layerManager->undo();
+        uiManager->undoManager->undo();
+        layers = layerManager->layers;
+        overlay = layerManager->selectionOverlay;
+        update();
     }
 
     if (event->key() == Qt::Key_Y && event->modifiers() & Qt::ControlModifier)
     {
-        //redo();
-        //layerManager->redo();
+        uiManager->undoManager->redo();
+        layers = layerManager->layers;
+        overlay = layerManager->selectionOverlay;
+        update();
+        repaint();
+
     }
 
     if (event->key() == Qt::Key_Space)
@@ -175,7 +196,7 @@ void LassoTool::mouseMoveEvent(QMouseEvent* event)
 
     if (isPanning)
     {
-        if (!lastPanPoint.isNull()) 
+        if (!lastPanPoint.isNull())
         {
             QPoint change = event->position().toPoint() - lastPanPoint;
             panOffset += change;
@@ -216,110 +237,117 @@ void LassoTool::mouseReleaseEvent(QMouseEvent* event)
         //}
         //else
         //{
-            if (makingRemoval)
+        if (makingRemoval)
+        {
+            bool removedFromMerge = false;
+
+
+            for (int i = 0; i < selectionsPath.length(); ++i)
             {
-                bool removedFromMerge = false;
-
-
-                for (int i = 0; i < selectionsPath.length(); ++i)
+                QPainterPath& path = selectionsPath[i];
+                if (path.intersects(newPath))
                 {
-                    QPainterPath& path = selectionsPath[i];
-                    if (path.intersects(newPath))
+                    QPainterPath subtractionPath = path.subtracted(newPath);
+                    selectionsPath[i] = subtractionPath;
+                    removedFromMerge = true;
+                    bool changed = true;
+                    while (changed)
                     {
-                        QPainterPath subtractionPath = path.subtracted(newPath);
-                        selectionsPath[i] = subtractionPath;
-                        removedFromMerge = true;
-                        bool changed = true;
-                        while (changed)
+                        changed = false;
+                        for (int k = 0; k < selectionsPath.length(); ++k)
                         {
-                            changed = false;
-                            for (int k = 0; k < selectionsPath.length(); ++k)
-                            {
-                                QPainterPath& otherPath = selectionsPath[k];
-                                if (i == k) continue;
+                            QPainterPath& otherPath = selectionsPath[k];
+                            if (i == k) continue;
 
-                                if (selectionsPath[i].intersects(otherPath))
-                                {
-                                    selectionsPath[i] = selectionsPath[i].subtracted(otherPath);
-                                    selectionsPath.erase(selectionsPath.begin() + k);                                    changed = true;
-                                    changed = true;
-                                    break;
-                                }
+                            if (selectionsPath[i].intersects(otherPath))
+                            {
+                                selectionsPath[i] = selectionsPath[i].subtracted(otherPath);
+                                selectionsPath.erase(selectionsPath.begin() + k);                                    changed = true;
+                                changed = true;
+                                break;
                             }
                         }
                     }
-                    if (!removedFromMerge)
-                    {
-                        selectionsPath.append(newPath);
-                    }
-
+                }
+                if (!removedFromMerge)
+                {
+                    selectionsPath.append(newPath);
                 }
 
             }
-            else if (makingAdditionalSelection)
+
+        }
+        else if (makingAdditionalSelection)
+        {
+            bool mergedAnyPolygons = false;
+            for (int i = 0; i < selectionsPath.length(); ++i)
             {
-                bool mergedAnyPolygons = false;
-                for (int i = 0; i < selectionsPath.length(); ++i)
-                {
-                    QPainterPath& path = selectionsPath[i];
+                QPainterPath& path = selectionsPath[i];
 
-                    if (path.intersects(newPath)) {
-                        QPainterPath mergedPath = path.united(newPath);
-                        selectionsPath[i] = mergedPath;
+                if (path.intersects(newPath)) {
+                    QPainterPath mergedPath = path.united(newPath);
+                    selectionsPath[i] = mergedPath;
 
-                        mergedAnyPolygons = true;
-                        bool changed = true;
+                    mergedAnyPolygons = true;
+                    bool changed = true;
 
-                        while (changed)
-                        {   
-                            changed = true;
-                            for (int j = 0; j < selectionsPath.length(); ++j)
+                    while (changed)
+                    {
+                        changed = true;
+                        for (int j = 0; j < selectionsPath.length(); ++j)
+                        {
+                            QPainterPath& otherPath = selectionsPath[j];
+                            if (j == i) continue;
+
+                            if (selectionsPath[i].intersects(otherPath))
                             {
-                                QPainterPath& otherPath = selectionsPath[j];
-                                if (j == i) continue;
-
-                                if (selectionsPath[i].intersects(otherPath))
-                                {
-                                    selectionsPath[i] = selectionsPath[i].united(otherPath);
-                                    selectionsPath.erase(selectionsPath.begin() + j);                                    changed = true;
-                                    break;
-                                }
-
+                                selectionsPath[i] = selectionsPath[i].united(otherPath);
+                                selectionsPath.erase(selectionsPath.begin() + j);                                    changed = true;
+                                break;
                             }
-                            break;
+
                         }
-                    }
-                    if (!mergedAnyPolygons)
-                    {
-                        selectionsPath.append(newPath);
+                        break;
                     }
                 }
-            }
-            else
-            {
+                if (!mergedAnyPolygons)
                 {
-                    selectionsPath.clear();
                     selectionsPath.append(newPath);
                 }
             }
         }
-        points.clear();
-        updateSelectionOverlay();
-        update();
+        else
+        {
+            {
+                selectionsPath.clear();
+                selectionsPath.append(newPath);
+            }
+        }
     }
+    points.clear();
 
-        //{
+    uiManager->undoManager->selectionOverlay = overlay;
+    uiManager->undoManager->pushUndo(layers);
+    //uiManager->undoManager->pushUndo(layers);
+
+    layerManager->update();
+
+    updateSelectionOverlay();
+    update();
+}
+
+//{
 
 
-        //    qDebug() << points.length();
+//    qDebug() << points.length();
 
 
 
-        //    points.clear();
-        //    updateSelectionOverlay();
-        //    update();
-        //}
-    //}
+//    points.clear();
+//    updateSelectionOverlay();
+//    update();
+//}
+//}
 //}
 void LassoTool::paintEvent(QPaintEvent* event)
 {
@@ -330,7 +358,7 @@ void LassoTool::paintEvent(QPaintEvent* event)
 
     painter.translate(center);
     painter.scale(zoomPercentage / 100, zoomPercentage / 100);
-    painter.translate(panOffset/ (zoomPercentage/100.0));
+    painter.translate(panOffset / (zoomPercentage / 100.0));
 
     painter.setRenderHint(QPainter::SmoothPixmapTransform, false);
     painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
@@ -410,3 +438,4 @@ void LassoTool::updateSelectionOverlay()
 
     //painter.translate(-center);
 }
+

@@ -18,13 +18,15 @@
 
 #include <ColourWindow.h>
 #include "LayerManager.h"
+#include <UIManager.h>
 
+class UIManager;
 
 class LassoTool : public QWidget
 {
     Q_OBJECT
 public:
-    explicit LassoTool(QWidget* parent = nullptr);
+    explicit LassoTool(UIManager* ui, QWidget* parent = nullptr);
     QVector<QImage> layers;
     LayerManager* layerManager;
     QImage overlay;
@@ -62,6 +64,8 @@ protected:
     void clearSelectionOverlay();
 
 private:
+    UIManager* uiManager;
+
     QPainterPath mergedSelectionsPath;
     QVector<QPoint> points;
     QPolygon selection;
@@ -79,8 +83,5 @@ private:
     QPoint lastPanPoint;
 
     bool panningEnabled;
-
-
-
-
 };
+

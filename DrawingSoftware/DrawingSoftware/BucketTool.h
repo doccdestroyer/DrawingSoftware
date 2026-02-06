@@ -12,6 +12,7 @@
 
 #include <ColourWindow.h>
 #include "LayerManager.h"
+#include <UIManager.h>
 
 
 class BucketTool : public QWidget
@@ -19,7 +20,7 @@ class BucketTool : public QWidget
     Q_OBJECT
 
 public:
-    explicit BucketTool(QWidget* parent = nullptr);
+    explicit BucketTool(UIManager* ui, QWidget* parent = nullptr);
     void zoomIn();
     void zoomOut();
     void resetZoom();
@@ -35,6 +36,8 @@ public:
     QPoint panOffset;
 
     QVector<QPainterPath> selectionsPath;
+
+    UIManager* uiManager;
 
     //signals:
 
@@ -52,6 +55,9 @@ protected:
 
     void mousePressEvent(QMouseEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
+
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
 
     //void dfs(QImage image, int pixelX, int pixelY, QColor oldColor, QColor newColor);
 
@@ -75,6 +81,9 @@ private:
 
     bool inSelection;
 
+
+    QColor newColour = QColor(Qt::red);
+
     int selectedLayerIndex = 1;
     QImage pngBackground;
     bool isHovering;
@@ -92,12 +101,7 @@ private:
     bool isDrawing = false;
     int delayCounter;
 
-    QImage brush;
 
-    QImage brushOutline;
-    std::string brushType;
-
-    QColor colour = QColor(Qt::red);
 
     QPoint lastPoint;
     QPointF lastPointF;
@@ -112,7 +116,7 @@ private:
     QStack<QVector<QImage>> redoStack;
 
 
-    int brushSize = 50;
+    QColor colour;
 
 
     //void removeLayer(int layer);
@@ -124,3 +128,5 @@ private:
     //void drawBrush(QPainter& p, const QPointF& pos, qreal pressure);
     QImage adjustBrushColour(const QImage& brush, const QColor& color);
 };
+
+

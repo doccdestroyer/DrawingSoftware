@@ -57,7 +57,7 @@ LayerManager::LayerManager(QWidget* parent)
     connect(newLayerButton, &QPushButton::clicked, this, [=]() {
         //int newIndex = layersList->count();
         int newIndex;
-        if (layers.count() == 0) 
+        if (layers.count() == 0)
         {
             newIndex = 0;
         }
@@ -238,3 +238,5 @@ void LayerManager::onDeleteClicked()
     qDebug() << layersList->count();
 
 }
+
+

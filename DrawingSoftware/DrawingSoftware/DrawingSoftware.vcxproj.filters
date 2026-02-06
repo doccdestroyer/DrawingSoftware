@@ -64,9 +64,15 @@
     <ClCompile Include="BucketTool.cpp">
       <Filter>Resource Files\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UIManager.cpp">
+      <Filter>Resource Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UndoManager.cpp">
+      <Filter>Resource Files\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ColourWindow.h">
+    <ClInclude Include="UndoManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -90,6 +96,12 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="BucketTool.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="UIManager.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ColourWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
