@@ -82,7 +82,9 @@ BrushTool::BrushTool(UIManager* ui, QWidget* parent)
 
             uiManager->undoManager->pushUndo(layers);
 
+            uiManager->undoManager->selectionOverlay = overlay;
 
+            uiManager->undoManager->selectionsPath = selectionsPath;
             // pushUndo(layers);
             layerManager->update();
             update();
@@ -98,6 +100,11 @@ BrushTool::BrushTool(UIManager* ui, QWidget* parent)
             layers.removeAt(layerIndex);
             //pushUndo(layers);
             uiManager->undoManager->pushUndo(layers);
+            uiManager->undoManager->selectionOverlay = overlay;
+            uiManager->undoManager->selectionsPath = selectionsPath;
+
+            //->undoManager->pushUndo(layers);
+
 
 
             if (layers.count() == 0) {
@@ -203,8 +210,16 @@ void BrushTool::tabletEvent(QTabletEvent* event)
         //pushUndo(layers);
 
         uiManager->undoManager->pushUndo(layers);
+        
+        uiManager->undoManager->selectionOverlay = overlay;
+        //uiManager->undoManager->pushUndo(layers);
+        uiManager->undoManager->selectionsPath = selectionsPath;
 
         uiManager->undoManager->redoLayerStack.clear();
+
+        uiManager->undoManager->redoLayerStack.clear();
+        uiManager->undoManager->redoSelectionPathStack.clear();
+
         layerManager->update();
 
         update();
@@ -387,6 +402,8 @@ void BrushTool::mousePressEvent(QMouseEvent* event)
     if (usingTablet == true) return;
     if (layers.count() < 1) return;
 
+    selectionsPath = layerManager->selectionsPath;
+
     if (event->button() == Qt::LeftButton) {
         if (panningEnabled) {
             lastPanPoint = event->pos();
@@ -462,7 +479,15 @@ void BrushTool::mouseReleaseEvent(QMouseEvent* event)
 
         uiManager->undoManager->pushUndo(layers);
         layerManager->layers = layers;
+
+        uiManager->undoManager->selectionOverlay = overlay;
+        //uiManager->undoManager->pushUndo(layers);
+        uiManager->undoManager->selectionsPath = selectionsPath;
+
+        uiManager->undoManager->redoSelectionStack.clear();
         uiManager->undoManager->redoLayerStack.clear();
+        uiManager->undoManager->redoSelectionPathStack.clear();
+
         update();
     }
 
@@ -470,6 +495,7 @@ void BrushTool::mouseReleaseEvent(QMouseEvent* event)
 
 void BrushTool::paintEvent(QPaintEvent* event)
 {
+    overlay = layerManager->selectionOverlay;
 
     QPainter painter(this);
     QPoint center = rect().center();

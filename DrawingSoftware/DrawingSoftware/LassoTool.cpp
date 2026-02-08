@@ -10,11 +10,7 @@
 QPoint LassoTool::mapToImage(const QPoint& p)
 {
     QPoint center = rect().center();
-    //QPoint panOffset = QPoint(0, 0);
     QPoint offsetPoint = (p - center - panOffset) / (zoomPercentage / 100.0);
-    //QPoint offsetPoint = (p - center );
-
-
     return offsetPoint + QPoint(image.width() / 2.0, image.height() / 2.0);
 }
 
@@ -24,36 +20,20 @@ LassoTool::LassoTool(UIManager* ui, QWidget* parent)
     setAttribute(Qt::WA_TabletTracking);
     setAttribute(Qt::WA_MouseTracking);
     setMouseTracking(true);
-
-
     setFocusPolicy(Qt::StrongFocus);
 
     pngBackground = QImage(QDir::currentPath() + "/Images/PNGBackground.png");
-
     background = QImage(1100, 1100, QImage::Format_ARGB32_Premultiplied);
     image = background;
     image.fill(Qt::transparent);
     originalImage = image;
     background.fill(Qt::white);
-
-    layerManager = new LayerManager(this);
-    //layerManager->show();
-
-    layers = layerManager->layers;
-
     overlay = QImage(image.size(), QImage::Format_ARGB32_Premultiplied);
     overlay.fill(Qt::transparent);
 
-
-
     uiManager = ui;
-
     layerManager = uiManager->undoManager->layerManager;
-
-
-
     overlay = layerManager->selectionOverlay;
-
     layers = layerManager->layers;
     layerManager->layers = layers;
     layerManager->update();
@@ -77,16 +57,13 @@ void LassoTool::resetZoom()
 
 void LassoTool::applyZoom(float zoomAmount)
 {
-
     if (1 <= zoomPercentage * zoomAmount <= 12800)
     {
         zoomPercentage = zoomPercentage * zoomAmount;
     }
     else if (zoomPercentage < 1) { zoomPercentage = 1; }
     else { zoomPercentage = 12800; }
-    repaint();
     update();
-
 }
 
 void LassoTool::keyPressEvent(QKeyEvent* event)
@@ -120,8 +97,6 @@ void LassoTool::keyPressEvent(QKeyEvent* event)
         layers = layerManager->layers;
         overlay = layerManager->selectionOverlay;
         update();
-        repaint();
-
     }
 
     if (event->key() == Qt::Key_Space)
@@ -156,7 +131,6 @@ void LassoTool::mousePressEvent(QMouseEvent* event)
 {
     if (event->button() == Qt::LeftButton)
     {
-        //IF PANNING 
         if (panningEnabled)
         {
             lastPanPoint = event->pos();
@@ -190,10 +164,7 @@ void LassoTool::mousePressEvent(QMouseEvent* event)
 
 void LassoTool::mouseMoveEvent(QMouseEvent* event)
 {
-
-    if (!(event->buttons() & Qt::LeftButton))
-        return;
-
+    if (!(event->buttons() & Qt::LeftButton)) return;
     if (isPanning)
     {
         if (!lastPanPoint.isNull())
@@ -222,6 +193,13 @@ void LassoTool::mouseReleaseEvent(QMouseEvent* event)
         {
             points.clear();
             updateSelectionOverlay();
+
+            update();
+            uiManager->undoManager->selectionOverlay = overlay;
+            uiManager->undoManager->pushUndo(layers);
+            uiManager->undoManager->selectionsPath = selectionsPath;
+
+            layerManager->update();
             return;
         }
 
@@ -230,13 +208,6 @@ void LassoTool::mouseReleaseEvent(QMouseEvent* event)
         QPainterPath newPath = QPainterPath();
         newPath.addPolygon(selection);
 
-        //if (!makingRemoval && !makingAdditionalSelection)
-        //{
-        //    selectionsPath.clear();
-        //    selectionsPath.append(newPath);
-        //}
-        //else
-        //{
         if (makingRemoval)
         {
             bool removedFromMerge = false;
@@ -262,7 +233,7 @@ void LassoTool::mouseReleaseEvent(QMouseEvent* event)
                             if (selectionsPath[i].intersects(otherPath))
                             {
                                 selectionsPath[i] = selectionsPath[i].subtracted(otherPath);
-                                selectionsPath.erase(selectionsPath.begin() + k);                                    changed = true;
+                                selectionsPath.erase(selectionsPath.begin() + k);
                                 changed = true;
                                 break;
                             }
@@ -326,29 +297,15 @@ void LassoTool::mouseReleaseEvent(QMouseEvent* event)
     }
     points.clear();
 
-    uiManager->undoManager->selectionOverlay = overlay;
-    uiManager->undoManager->pushUndo(layers);
-    //uiManager->undoManager->pushUndo(layers);
-
-    layerManager->update();
-
     updateSelectionOverlay();
     update();
+    uiManager->undoManager->selectionOverlay = overlay;
+    uiManager->undoManager->pushUndo(layers);
+    uiManager->undoManager->selectionsPath = selectionsPath;
+
+    layerManager->update();
 }
 
-//{
-
-
-//    qDebug() << points.length();
-
-
-
-//    points.clear();
-//    updateSelectionOverlay();
-//    update();
-//}
-//}
-//}
 void LassoTool::paintEvent(QPaintEvent* event)
 {
     QPainter painter(this);
@@ -364,7 +321,6 @@ void LassoTool::paintEvent(QPaintEvent* event)
     painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
 
     QPointF topLeft(-image.width() / 2.0, -image.height() / 2.0);
-    //QPointF topLeft(center);
     painter.fillRect(rect(), Qt::black);
 
     painter.drawImage(topLeft, pngBackground);
@@ -408,8 +364,6 @@ void LassoTool::updateSelectionOverlay()
 
     painter.setPen(outlinePen);
     painter.setBrush(fillBrush);
-    //QPolygon polygon = sleec
-    //painter.drawPath(selectionsPath);
 
     for (const QPainterPath& path : selectionsPath) {
         QVector<QPolygonF> allPolys = path.toFillPolygons();
@@ -424,18 +378,11 @@ void LassoTool::updateSelectionOverlay()
             painter.drawPolygon(polyQ);
         }
     }
-
-
     if (points.count() > 1)
     {
         painter.drawPolyline(QPolygon(points));
 
     }
-
-    //painter.drawPolyline(points);
     update();
-    //painter.scale(100 / zoomPercentage, 100 / zoomPercentage);
-
-    //painter.translate(-center);
 }
 

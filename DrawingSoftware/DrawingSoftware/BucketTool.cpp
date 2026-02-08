@@ -61,6 +61,10 @@ BucketTool::BucketTool(UIManager* ui, QWidget* parent)
             layers.insert(layerIndex, originalImage);
             //pushUndo(layers);
             layerManager->update();
+
+            uiManager->undoManager->selectionOverlay = overlay;
+            uiManager->undoManager->selectionsPath = selectionsPath;
+            uiManager->undoManager->pushUndo(layers);
             update();
         });
 
@@ -138,7 +142,11 @@ void BucketTool::keyPressEvent(QKeyEvent* event)
     if (event->key() == Qt::Key_Y && event->modifiers() & Qt::ControlModifier)
     {
         uiManager->undoManager->redo();
+
         layers = layerManager->layers;
+        selectionsPath = uiManager->undoManager->selectionsPath;
+        overlay = uiManager->undoManager->selectionOverlay;
+
         update();
     }
 
@@ -180,6 +188,9 @@ void BucketTool::keyReleaseEvent(QKeyEvent* event)
 
 void BucketTool::paintEvent(QPaintEvent* event)
 {
+    overlay = uiManager->undoManager->selectionOverlay;
+
+
     QPainter painter(this);
     QPoint center = rect().center();
     //QPoint hoverOffset = center - hoverPoint.toPoint();
@@ -236,8 +247,7 @@ void BucketTool::mousePressEvent(QMouseEvent* event)
         {
             QPoint point = mapToImage(event->pos());
 
-
-
+            selectionsPath = uiManager->undoManager->selectionsPath;
             if (selectionsPath.length() > 0)
             {
                 QVector<QPainterPath> newPath = selectionsPath;
@@ -253,7 +263,7 @@ void BucketTool::mousePressEvent(QMouseEvent* event)
                     QPainterPath subtractionPath = imagePath.subtracted(path);
                     newPath[i] = subtractionPath;
 
-                    newPath[i] = (subtractionPath != path) ? subtractionPath : path;  // One-liner fix here
+                    //newPath[i] = (subtractionPath != path) ? subtractionPath : path;
                     changed = (subtractionPath != path);
                     changed = true;
                     while (changed)
@@ -301,7 +311,12 @@ void BucketTool::mousePressEvent(QMouseEvent* event)
     }
     uiManager->undoManager->pushUndo(layers);
     layerManager->layers = layers;
+    uiManager->undoManager->selectionsPath = selectionsPath;
+
     uiManager->undoManager->redoLayerStack.clear();
+    uiManager->undoManager->redoSelectionPathStack.clear();
+    uiManager->undoManager->redoSelectionStack.clear();
+
     update();
 
 }
@@ -337,6 +352,7 @@ QImage BucketTool::fill(QImage& image, int startX, int startY,
 
     QStack<QPoint> stack;
     stack.push(QPoint(startX, startY));
+
 
     while (!stack.isEmpty())
     {

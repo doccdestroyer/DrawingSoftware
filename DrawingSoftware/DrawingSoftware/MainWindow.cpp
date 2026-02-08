@@ -31,7 +31,7 @@ MainWindow::MainWindow()
     brushTool = new BrushTool(uiManager, this);
     lassoTool = new LassoTool(uiManager, this);
     bucketTool = new BucketTool(uiManager, this);
-
+    polygonalLassoTool = new PolygonalLassoTool(uiManager, this);
     toolSelectionMenu = new ToolSelectionMenu(this);
 
 
@@ -64,6 +64,11 @@ MainWindow::MainWindow()
         this, [&]()
         {
             disableBucketTool();
+        });
+    connect(polygonalLassoTool, &PolygonalLassoTool::polygonalLassoDisabled,
+        this, [&]()
+        {
+            disablePolygonalLassoTool();
         });
 
 
@@ -101,6 +106,11 @@ MainWindow::MainWindow()
         {
             enableBucketTool();
         });
+    connect(toolSelectionMenu, &ToolSelectionMenu::polygonalLassoEnabled,
+        this, [&]()
+        {
+            enablePolygonalLassoTool();
+        });
 
     connect(toolSelectionMenu, &ToolSelectionMenu::brushDisabled,
         this, [&]()
@@ -117,10 +127,28 @@ MainWindow::MainWindow()
         {
             disableBucketTool();
         });
+    connect(toolSelectionMenu, &ToolSelectionMenu::polygonalLassoDisabled,
+        this, [&]()
+        {
+            disablePolygonalLassoTool();
+        });
 
 
 }
+void MainWindow::disablePolygonalLassoTool()
+{
+    polygonalLassoTool->points.clear();
+    polygonalLassoTool->isComplete = false;
+    polygonalLassoTool->isDrawing = false;
+    polygonalLassoTool->isFirstClick = true;
+    polygonalLassoTool->updateSelectionOverlay();
 
+    layerManager->updateLayers(polygonalLassoTool->layers,
+        polygonalLassoTool->overlay,
+        polygonalLassoTool->zoomPercentage,
+        polygonalLassoTool->panOffset,
+        polygonalLassoTool->selectionsPath);
+}
 void MainWindow::disableBrushTool()
 {
     layerManager->updateLayers(brushTool->layers,
@@ -168,7 +196,17 @@ void MainWindow::enableBrushTool()
     brushTool->overlay = layerManager->selectionOverlay;
 }
 
+void MainWindow::enablePolygonalLassoTool()
+{
+    dock->setWidget(polygonalLassoTool);
+    polygonalLassoTool->layers = layerManager->layers;
+    polygonalLassoTool->zoomPercentage = layerManager->zoomPercentage;
+    polygonalLassoTool->panOffset = layerManager->panOffset;
+    polygonalLassoTool->selectionsPath = layerManager->selectionsPath;
+    polygonalLassoTool->overlay = layerManager->selectionOverlay;
 
+    //polygonalLassoTool->updateSelectionOverlay();
+}
 
 
 void MainWindow::enableBucketTool()

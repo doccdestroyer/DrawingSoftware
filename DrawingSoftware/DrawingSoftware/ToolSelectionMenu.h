@@ -31,10 +31,12 @@ signals:
     void brushEnabled();
     void lassoEnabled();
     void bucketEnabled();
+    void polygonalLassoEnabled();
 
     void brushDisabled();
     void lassoDisabled();
     void bucketDisabled();
+    void polygonalLassoDisabled();
 
 private:
     QIcon icon;
@@ -47,6 +49,7 @@ private:
     void enableBrushTool();
     void enableLassoTool();
     void enableBucketTool();
+    void enablePolygonalLassoTool();
 
     void disableTool();
 

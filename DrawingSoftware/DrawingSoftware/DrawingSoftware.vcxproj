@@ -20,7 +20,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -95,6 +95,7 @@
     <ClCompile Include="BucketTool.cpp" />
     <ClCompile Include="LassoTool.cpp" />
     <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="PolygonalLassoTool.cpp" />
     <ClCompile Include="ToolSelectionMenu.cpp">
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
@@ -115,6 +116,7 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="UIManager.h" />
+    <QtMoc Include="PolygonalLassoTool.h" />
     <ClInclude Include="UndoManager.h" />
     <QtMoc Include="ToolSelectionMenu.h" />
     <QtMoc Include="LassoTool.h" />

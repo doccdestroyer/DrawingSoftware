@@ -52,6 +52,16 @@ void ToolSelectionMenu::createToolBar()
 		enableBucketTool();
 		});
 	toolBar->addAction(bucketAction);
+
+	QAction* polygonalAction = new QAction(
+		QIcon(QDir::currentPath() + "/Images/Icons/polylasso.png"),
+		tr("&PolygonalLasso"),
+		this);
+	polygonalAction->setStatusTip(tr("&Polygonal Lasso Tool"));;
+	connect(polygonalAction, &QAction::triggered, this, [&]() {
+		enablePolygonalLassoTool();
+		});
+	toolBar->addAction(polygonalAction);
 }
 
 void ToolSelectionMenu::disableTool()
@@ -67,6 +77,10 @@ void ToolSelectionMenu::disableTool()
 	else if (selectedTool == "Bucket")
 	{
 		emit bucketDisabled();
+	}
+	else if (selectedTool == "PolygonalLasso")
+	{
+		emit polygonalLassoDisabled();
 	}
 }
 
@@ -92,6 +106,14 @@ void ToolSelectionMenu::enableBucketTool()
 	disableTool();
 	emit bucketEnabled();
 	selectedTool = "Bucket";
+
+}
+
+void ToolSelectionMenu::enablePolygonalLassoTool()
+{
+	disableTool();
+	emit polygonalLassoEnabled();
+	selectedTool = "PolygonalLasso";
 
 }
 

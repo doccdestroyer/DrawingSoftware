@@ -7,6 +7,7 @@
 #include <BrushTool.h>
 #include <LassoTool.h>
 #include <BucketTool.h>
+#include <PolygonalLassoTool.h>
 #include <UIManager.h>
 #include <QDockWidget>
 #include <ToolSelectionMenu.h>
@@ -30,6 +31,7 @@ private:
     LayerManager* layerManager = nullptr;
     BrushTool* brushTool = nullptr;
     LassoTool* lassoTool = nullptr;
+    PolygonalLassoTool* polygonalLassoTool = nullptr;
     BucketTool* bucketTool = nullptr;
     ToolSelectionMenu* toolSelectionMenu = nullptr;
     UIManager* uiManager = nullptr;
@@ -37,7 +39,9 @@ private:
     void enableBucketTool();
     void enableBrushTool();
     void enableLassoTool();
+    void enablePolygonalLassoTool();
 
+    void disablePolygonalLassoTool();
     void disableLassoTool();
     void disableBrushTool();
     void disableBucketTool();

@@ -7,10 +7,11 @@ UndoManager::UndoManager(QWidget* parent)
     layerManager = new LayerManager(this);
 
     selectionOverlay = layerManager->selectionOverlay;
-
+    selectionsPath = layerManager->selectionsPath;
     layers = layerManager->layers;
-    undoLayerStack.push(layers);
 
+    undoLayerStack.push(layers);
+    undoSelectionPathStack.push(selectionsPath);
     undoSelectionStack.push(selectionOverlay);
 }
 
@@ -21,12 +22,16 @@ void UndoManager::pushUndo(const QVector<QImage>& layers)
 
     undoSelectionStack.push(selectionOverlay);
     if (undoSelectionStack.size() > 50) undoSelectionStack.remove(0);
+
+    undoSelectionPathStack.push(selectionsPath);
+    if (undoSelectionPathStack.size() > 50) undoSelectionPathStack.remove(0);
 }
 
 void UndoManager::undo()
 {
     if (undoLayerStack.size() <= 1) return;
     if (undoSelectionStack.size() <= 1) return;
+    if (undoSelectionPathStack.size() <= 1) return;
 
     redoLayerStack.push(undoLayerStack.pop());
     layers = undoLayerStack.top();
@@ -35,7 +40,13 @@ void UndoManager::undo()
     redoSelectionStack.push(undoSelectionStack.pop());
     selectionOverlay = undoSelectionStack.top();
     layerManager->selectionOverlay = selectionOverlay;
+
+    
+    redoSelectionPathStack.push(undoSelectionPathStack.pop());
+    selectionsPath = undoSelectionPathStack.top();
+    layerManager->selectionsPath = selectionsPath;
     //layerManager->undo();
+    layerManager->update();
     update();
 }
 
@@ -43,6 +54,7 @@ void UndoManager::redo()
 {
     if (redoLayerStack.isEmpty()) return;
     if (redoSelectionStack.isEmpty()) return;
+    if (redoSelectionPathStack.isEmpty()) return;
 
     layers = redoLayerStack.pop();
     undoLayerStack.push(layers);
@@ -51,7 +63,13 @@ void UndoManager::redo()
     selectionOverlay = redoSelectionStack.pop();
     undoSelectionStack.push(selectionOverlay);
     layerManager->selectionOverlay = selectionOverlay;
+
+    selectionsPath = redoSelectionPathStack.pop();
+    undoSelectionPathStack.push(selectionsPath);
+    layerManager->selectionsPath = selectionsPath;
+
     //layerManager->redo();
+    layerManager->update();
     update();
 }
 

@@ -1,7 +1,7 @@
 ﻿   Qt/MSBuild: 3.4.1.0
    Qt: 6.10.1
-  LassoTool.cpp
-C:\Users\akahn\Desktop\Specialism\Repo\DrawingSoftware\DrawingSoftware\DrawingSoftware\LassoTool.cpp(64,16): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\akahn\Desktop\Specialism\Repo\DrawingSoftware\DrawingSoftware\DrawingSoftware\LassoTool.cpp(69,16): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\akahn\Desktop\Specialism\Repo\DrawingSoftware\DrawingSoftware\DrawingSoftware\LassoTool.cpp(81,11): warning C4804: '<=': unsafe use of type 'bool' in operation
-  DrawingSoftware.vcxproj -> C:\Users\akahn\Desktop\Specialism\Repo\DrawingSoftware\DrawingSoftware\x64\Debug\DrawingSoftware.exe
+  PolygonalLassoTool.cpp
+C:\Users\akahn\OneDrive\Desktop\Year2\Specialism\Repo3\DrawingSoftware\DrawingSoftware\DrawingSoftware\PolygonalLassoTool.cpp(53,16): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\akahn\OneDrive\Desktop\Year2\Specialism\Repo3\DrawingSoftware\DrawingSoftware\DrawingSoftware\PolygonalLassoTool.cpp(58,16): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\akahn\OneDrive\Desktop\Year2\Specialism\Repo3\DrawingSoftware\DrawingSoftware\DrawingSoftware\PolygonalLassoTool.cpp(69,11): warning C4804: '<=': unsafe use of type 'bool' in operation
+  DrawingSoftware.vcxproj -> C:\Users\akahn\OneDrive\Desktop\Year2\Specialism\Repo3\DrawingSoftware\DrawingSoftware\x64\Debug\DrawingSoftware.exe

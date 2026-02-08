@@ -1,4 +1,4 @@
-#include <ColourWindow.h>
+    #include <ColourWindow.h>
 
 ColourWindow::ColourWindow(QWidget* parent) : QWidget(parent)
 

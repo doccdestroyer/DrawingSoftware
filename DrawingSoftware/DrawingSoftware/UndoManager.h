@@ -24,6 +24,10 @@ public:
 	QStack<QImage> undoSelectionStack;
 	QStack<QImage> redoSelectionStack;
 
+	QStack<QVector<QPainterPath>> undoSelectionPathStack;
+	QStack<QVector<QPainterPath>> redoSelectionPathStack;
+
+	QVector<QPainterPath> selectionsPath;
 	QImage selectionOverlay;
 
 private:
@@ -31,7 +35,5 @@ private:
 	QImage background;
 	QImage originalImage;
 	QVector<QImage> layers;
-
-
 };
 

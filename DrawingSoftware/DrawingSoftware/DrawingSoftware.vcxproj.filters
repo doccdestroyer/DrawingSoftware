@@ -70,6 +70,9 @@
     <ClCompile Include="UndoManager.cpp">
       <Filter>Resource Files\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PolygonalLassoTool.cpp">
+      <Filter>Resource Files\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="UndoManager.h">
@@ -102,6 +105,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="ColourWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="PolygonalLassoTool.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
