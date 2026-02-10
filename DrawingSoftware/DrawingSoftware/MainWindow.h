@@ -2,8 +2,16 @@
 
 #include <QMainWindow>
 #include <QKeyEvent>
+#include <QDockWidget>
+#include <QHBoxLayout>
+#include <QLayout>
+
 #include <ColourWindow.h>
 #include <LayerManager.h>
+#include <UIManager.h>
+#include <ToolSelectionMenu.h>
+#include <BrushControlsWindow.h>
+
 #include <BrushTool.h>
 #include <LassoTool.h>
 #include <BucketTool.h>
@@ -11,11 +19,8 @@
 #include <MagicWandTool.h>
 #include <RectangularSelectionTool.h>
 #include <EllipticalSelectionTool.h>
-#include <UIManager.h>
-#include <QDockWidget>
-#include <ToolSelectionMenu.h>
-#include <QHBoxLayout>
-#include <QLayout>
+
+
 
 class MainWindow : public QMainWindow
 {
@@ -43,7 +48,7 @@ private:
 
     ToolSelectionMenu* toolSelectionMenu = nullptr;
     UIManager* uiManager = nullptr;
-
+    BrushControlsWindow* brushControlsWindow = nullptr;
     void enableBucketTool();
     void enableBrushTool();
     void enableLassoTool();

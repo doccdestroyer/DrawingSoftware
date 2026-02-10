@@ -50,6 +50,28 @@ MainWindow::MainWindow()
     //toolSelectionMenu->show();
     createDockWindows();
 
+    brushControlsWindow = new BrushControlsWindow(this);
+    brushControlsWindow->show();
+
+    connect(brushControlsWindow, &BrushControlsWindow::chalkEnabled,
+        this, [&]()
+        {
+            brushTool->brush = QImage(QDir::currentPath() + "/Images/ChalkRot.png");
+            brushTool->brushOutline = QImage(QDir::currentPath() + "/Images/ChalkRot_Outline.png");
+        });
+    connect(brushControlsWindow, &BrushControlsWindow::roundEnabled,
+        this, [&]()
+        {
+            brushTool->brush = QImage(QDir::currentPath() + "/Images/CircleBrush.png");
+            brushTool->brushOutline = QImage(QDir::currentPath() + "/Images/CircleBrush_Outline.png");
+        });
+    connect(brushControlsWindow, &BrushControlsWindow::horizontalChalkEnabled,
+        this, [&]()
+        {
+            brushTool->brush = QImage(QDir::currentPath() + "/Images/HorizontalBrush.png");
+            brushTool->brushOutline = QImage(QDir::currentPath() + "/Images/HorizontalBrush_Outline.png");
+        });
+
 
 
     connect(brushTool, &BrushTool::brushDisabled,
@@ -420,7 +442,7 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
 
 void MainWindow::createDockWindows()
 {
-    dock = new QDockWidget(tr("Customers"), this);
+    dock = new QDockWidget(tr("Colour Window"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 
     colourWindow->setMinimumSize(200, 200);
@@ -429,12 +451,12 @@ void MainWindow::createDockWindows()
 
 
 
-    dock = new QDockWidget(tr("Paragraphs"), this);
+    dock = new QDockWidget(tr("Layers"), this);
     dock->setWidget(layerManager);
     addDockWidget(Qt::RightDockWidgetArea, dock);
 
-    QWidget* centralWidget = new QWidget();
-    QHBoxLayout* layout = new QHBoxLayout(centralWidget);
+    //QWidget* centralWidget = new QWidget();
+    //QHBoxLayout* layout = new QHBoxLayout(centralWidget);
 
     QDockWidget* ToolDock = new QDockWidget(tr("Tools"), this);
     ToolDock->setWidget(toolSelectionMenu);

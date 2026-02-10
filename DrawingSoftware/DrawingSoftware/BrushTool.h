@@ -47,7 +47,10 @@ public:
 
     //signals:
 
+    QImage brush;
 
+    QImage brushOutline;
+    std::string brushType;
     //private slots:
 
 protected:
@@ -100,10 +103,7 @@ private:
     bool isDrawing = false;
     int delayCounter;
 
-    QImage brush;
 
-    QImage brushOutline;
-    std::string brushType;
 
     QColor colour = QColor(Qt::red);
 

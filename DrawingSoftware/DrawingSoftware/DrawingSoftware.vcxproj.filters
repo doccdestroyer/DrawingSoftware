@@ -79,6 +79,9 @@
     <ClCompile Include="EllipticalSelectionTool.cpp">
       <Filter>Resource Files\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BrushControlsWindow.cpp">
+      <Filter>Resource Files\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="UndoManager.h">
@@ -123,6 +126,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="EllipticalSelectionTool.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="BrushControlsWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

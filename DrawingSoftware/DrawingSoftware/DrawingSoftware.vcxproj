@@ -20,7 +20,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -92,6 +92,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BrushControlsWindow.cpp" />
     <ClCompile Include="BucketTool.cpp" />
     <ClCompile Include="EllipticalSelectionTool.cpp" />
     <ClCompile Include="LassoTool.cpp" />
@@ -122,6 +123,7 @@
     <QtMoc Include="MagicWandTool.h" />
     <QtMoc Include="RectangularSelectionTool.h" />
     <QtMoc Include="EllipticalSelectionTool.h" />
+    <QtMoc Include="BrushControlsWindow.h" />
     <ClInclude Include="UndoManager.h" />
     <QtMoc Include="ToolSelectionMenu.h" />
     <QtMoc Include="LassoTool.h" />

@@ -1,6 +1,4 @@
 ﻿   Qt/MSBuild: 3.4.1.0
-  Reading Qt configuration (C:/Qt/6.10.1/msvc2022_64/bin/qmake)
    Qt: 6.10.1
   MainWindow.cpp
-  ToolSelectionMenu.cpp
-  DrawingSoftware.vcxproj -> C:\Users\akahn\OneDrive\Desktop\Year2\Specialism\Repo3\DrawingSoftware\DrawingSoftware\x64\Debug\DrawingSoftware.exe
+  DrawingSoftware.vcxproj -> C:\Users\akahn\Desktop\Specialism\Repo\DrawingSoftware\DrawingSoftware\x64\Debug\DrawingSoftware.exe
