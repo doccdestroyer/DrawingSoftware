@@ -57,7 +57,7 @@ MainWindow::MainWindow()
         this, [&]()
         {
             brushTool->brush = QImage(QDir::currentPath() + "/Images/ChalkRot.png");
-            brushTool->brushOutline = QImage(QDir::currentPath() + "/Images/ChalkRot_Outline.png");
+            brushTool->brushOutline = QImage(QDir::currentPath() + "/Images/ChalkRot_Outline.png"); q
         });
     connect(brushControlsWindow, &BrushControlsWindow::roundEnabled,
         this, [&]()
