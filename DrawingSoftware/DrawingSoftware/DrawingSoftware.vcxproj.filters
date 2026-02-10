@@ -73,6 +73,12 @@
     <ClCompile Include="PolygonalLassoTool.cpp">
       <Filter>Resource Files\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RectangularSelectionTool.cpp">
+      <Filter>Resource Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EllipticalSelectionTool.cpp">
+      <Filter>Resource Files\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="UndoManager.h">
@@ -108,6 +114,15 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="PolygonalLassoTool.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="MagicWandTool.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="RectangularSelectionTool.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="EllipticalSelectionTool.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

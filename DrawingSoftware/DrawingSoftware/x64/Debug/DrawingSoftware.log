@@ -1,7 +1,6 @@
 ﻿   Qt/MSBuild: 3.4.1.0
+  Reading Qt configuration (C:/Qt/6.10.1/msvc2022_64/bin/qmake)
    Qt: 6.10.1
-  PolygonalLassoTool.cpp
-C:\Users\akahn\OneDrive\Desktop\Year2\Specialism\Repo3\DrawingSoftware\DrawingSoftware\DrawingSoftware\PolygonalLassoTool.cpp(53,16): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\akahn\OneDrive\Desktop\Year2\Specialism\Repo3\DrawingSoftware\DrawingSoftware\DrawingSoftware\PolygonalLassoTool.cpp(58,16): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\akahn\OneDrive\Desktop\Year2\Specialism\Repo3\DrawingSoftware\DrawingSoftware\DrawingSoftware\PolygonalLassoTool.cpp(69,11): warning C4804: '<=': unsafe use of type 'bool' in operation
+  MainWindow.cpp
+  ToolSelectionMenu.cpp
   DrawingSoftware.vcxproj -> C:\Users\akahn\OneDrive\Desktop\Year2\Specialism\Repo3\DrawingSoftware\DrawingSoftware\x64\Debug\DrawingSoftware.exe

@@ -60,6 +60,7 @@ BrushTool::BrushTool(UIManager* ui, QWidget* parent)
 
 
 
+
     connect(colourWindow, &ColourWindow::colourChanged,
         this, [=](QColor newColor)
         {
@@ -85,7 +86,7 @@ BrushTool::BrushTool(UIManager* ui, QWidget* parent)
             uiManager->undoManager->selectionOverlay = overlay;
 
             uiManager->undoManager->selectionsPath = selectionsPath;
-            // pushUndo(layers);
+            //pushUndo(layers);
             layerManager->update();
             update();
         });
@@ -461,7 +462,9 @@ void BrushTool::mouseMoveEvent(QMouseEvent* event)
             delayCounter = 0;
         }
     }
-
+    layerManager->layers[selectedLayerIndex] = layers[selectedLayerIndex];
+    layerManager->layers = layers;
+    layerManager->update();
     update();
 }
 

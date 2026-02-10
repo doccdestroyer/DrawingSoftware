@@ -156,8 +156,6 @@ void BucketTool::keyPressEvent(QKeyEvent* event)
         setCursor(Qt::OpenHandCursor);
     }
 
-
-
     if (event->key() == Qt::Key_L)
     {
         emit bucketDisabled();
@@ -310,7 +308,9 @@ void BucketTool::mousePressEvent(QMouseEvent* event)
         }
     }
     uiManager->undoManager->pushUndo(layers);
+    layerManager->layers[selectedLayerIndex] = layers[selectedLayerIndex];
     layerManager->layers = layers;
+    layerManager->update();
     uiManager->undoManager->selectionsPath = selectionsPath;
 
     uiManager->undoManager->redoLayerStack.clear();

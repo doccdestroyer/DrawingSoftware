@@ -31,9 +31,12 @@ MainWindow::MainWindow()
     brushTool = new BrushTool(uiManager, this);
     lassoTool = new LassoTool(uiManager, this);
     bucketTool = new BucketTool(uiManager, this);
+    //magicWandTool = new MagicWandTool(uiManager, this);
     polygonalLassoTool = new PolygonalLassoTool(uiManager, this);
-    toolSelectionMenu = new ToolSelectionMenu(this);
+    rectangularSelectionTool = new RectangularSelectionTool(uiManager, this);
+    ellipticalSelectionTool = new EllipticalSelectionTool(uiManager, this);
 
+    toolSelectionMenu = new ToolSelectionMenu(this);
 
 
 
@@ -91,6 +94,7 @@ MainWindow::MainWindow()
         });
 
 
+
     connect(toolSelectionMenu, &ToolSelectionMenu::brushEnabled,
         this, [&]()
         {
@@ -111,6 +115,28 @@ MainWindow::MainWindow()
         {
             enablePolygonalLassoTool();
         });
+    connect(toolSelectionMenu, &ToolSelectionMenu::magicWandEnabled,
+        this, [&]()
+        {
+            enableMagicWandTool();
+        });
+    connect(toolSelectionMenu, &ToolSelectionMenu::rectangularSelectionEnabled,
+        this, [&]()
+        {
+            enableRectangularSelectionTool();
+        });
+
+    connect(toolSelectionMenu, &ToolSelectionMenu::ellipticalSelectionEnabled,
+        this, [&]()
+        {
+            enableEllipticalSelectionTool();
+        });
+    connect(toolSelectionMenu, &ToolSelectionMenu::eraserEnabled,
+        this, [&]()
+        {
+            enableEraser();
+        });
+
 
     connect(toolSelectionMenu, &ToolSelectionMenu::brushDisabled,
         this, [&]()
@@ -132,9 +158,29 @@ MainWindow::MainWindow()
         {
             disablePolygonalLassoTool();
         });
-
-
+    connect(toolSelectionMenu, &ToolSelectionMenu::magicWandDisabled,
+        this, [&]()
+        {
+            disableMagicWandTool();
+        });
+    connect(toolSelectionMenu, &ToolSelectionMenu::rectangularSelectionDisabled,
+        this, [&]()
+        {
+            disableRectangularSelectionTool();
+        });
+    connect(toolSelectionMenu, &ToolSelectionMenu::ellipticalSelectionDisabled,
+        this, [&]()
+        {
+            disableEllipticalSelectionTool();
+        });
+    connect(toolSelectionMenu, &ToolSelectionMenu::eraserDisabled,
+        this, [&]()
+        {
+            disableEraser();
+        });
 }
+
+
 void MainWindow::disablePolygonalLassoTool()
 {
     polygonalLassoTool->points.clear();
@@ -158,6 +204,15 @@ void MainWindow::disableBrushTool()
         brushTool->selectionsPath);
 }
 
+void MainWindow::disableMagicWandTool()
+{
+    layerManager->updateLayers(magicWandTool->layers,
+        magicWandTool->overlay,
+        magicWandTool->zoomPercentage,
+        magicWandTool->panOffset,
+        magicWandTool->selectionsPath);
+}
+
 void MainWindow::disableBucketTool()
 {
     layerManager->updateLayers(bucketTool->layers,
@@ -175,6 +230,38 @@ void MainWindow::disableLassoTool()
         lassoTool->panOffset,
         lassoTool->selectionsPath);
 }
+
+void MainWindow::disableRectangularSelectionTool()
+{
+    layerManager->updateLayers(rectangularSelectionTool->layers,
+        rectangularSelectionTool->overlay,
+        rectangularSelectionTool->zoomPercentage,
+        rectangularSelectionTool->panOffset,
+        rectangularSelectionTool->selectionsPath);
+}
+
+void MainWindow::disableEllipticalSelectionTool()
+{
+    layerManager->updateLayers(ellipticalSelectionTool->layers,
+        ellipticalSelectionTool->overlay,
+        ellipticalSelectionTool->zoomPercentage,
+        ellipticalSelectionTool->panOffset,
+        ellipticalSelectionTool->selectionsPath);
+}
+
+void MainWindow::disableEraser()
+{
+    //disableBrushTool();
+    layerManager->updateLayers(brushTool->layers,
+        brushTool->overlay,
+        brushTool->zoomPercentage,
+        brushTool->panOffset,
+        brushTool->selectionsPath);
+    brushTool->isErasing = false;
+}
+
+
+
 
 void MainWindow::enableLassoTool()
 {
@@ -194,6 +281,17 @@ void MainWindow::enableBrushTool()
     brushTool->panOffset = layerManager->panOffset;
     brushTool->selectionsPath = layerManager->selectionsPath;
     brushTool->overlay = layerManager->selectionOverlay;
+    brushTool->isErasing = false;
+}
+
+void MainWindow::enableMagicWandTool()
+{
+    dock->setWidget(magicWandTool);
+    magicWandTool->layers = layerManager->layers;
+    magicWandTool->zoomPercentage = layerManager->zoomPercentage;
+    magicWandTool->panOffset = layerManager->panOffset;
+    magicWandTool->selectionsPath = layerManager->selectionsPath;
+    magicWandTool->overlay = layerManager->selectionOverlay;
 }
 
 void MainWindow::enablePolygonalLassoTool()
@@ -211,8 +309,6 @@ void MainWindow::enablePolygonalLassoTool()
 
 void MainWindow::enableBucketTool()
 {
-
-
     dock->setWidget(bucketTool);
     bucketTool->layers = layerManager->layers;
     bucketTool->zoomPercentage = layerManager->zoomPercentage;
@@ -221,7 +317,31 @@ void MainWindow::enableBucketTool()
     bucketTool->overlay = layerManager->selectionOverlay;
 }
 
+void MainWindow::enableRectangularSelectionTool()
+{
+    dock->setWidget(rectangularSelectionTool);
+    rectangularSelectionTool->layers = layerManager->layers;
+    rectangularSelectionTool->zoomPercentage = layerManager->zoomPercentage;
+    rectangularSelectionTool->panOffset = layerManager->panOffset;
+    rectangularSelectionTool->selectionsPath = layerManager->selectionsPath;
+    rectangularSelectionTool->overlay = layerManager->selectionOverlay;
+}
 
+void MainWindow::enableEllipticalSelectionTool()
+{
+    dock->setWidget(ellipticalSelectionTool);
+    ellipticalSelectionTool->layers = layerManager->layers;
+    ellipticalSelectionTool->zoomPercentage = layerManager->zoomPercentage;
+    ellipticalSelectionTool->panOffset = layerManager->panOffset;
+    ellipticalSelectionTool->selectionsPath = layerManager->selectionsPath;
+    ellipticalSelectionTool->overlay = layerManager->selectionOverlay;
+}
+
+void MainWindow::enableEraser()
+{
+    enableBrushTool();
+    brushTool->isErasing = true;
+}
 void MainWindow::keyPressEvent(QKeyEvent* event)
 {
     //if (event->key() == 61 && event->modifiers() & Qt::ControlModifier)

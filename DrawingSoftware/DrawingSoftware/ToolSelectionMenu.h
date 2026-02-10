@@ -32,11 +32,19 @@ signals:
     void lassoEnabled();
     void bucketEnabled();
     void polygonalLassoEnabled();
+    void magicWandEnabled();
+    void rectangularSelectionEnabled();
+    void ellipticalSelectionEnabled();
+    void eraserEnabled();
 
     void brushDisabled();
     void lassoDisabled();
     void bucketDisabled();
     void polygonalLassoDisabled();
+    void magicWandDisabled();
+    void rectangularSelectionDisabled();
+    void ellipticalSelectionDisabled();
+    void eraserDisabled();
 
 private:
     QIcon icon;
@@ -50,6 +58,10 @@ private:
     void enableLassoTool();
     void enableBucketTool();
     void enablePolygonalLassoTool();
+    void enableMagicWandTool();
+    void enableRectangularSelectionTool();
+    void enableEllipticalSelectionTool();
+    void enableEraserTool();
 
     void disableTool();
 

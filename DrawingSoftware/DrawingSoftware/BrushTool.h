@@ -31,6 +31,7 @@ public:
 
     //UIManager* uiManager;
 
+    bool isErasing = false;
 
 
     /// ////////////////
@@ -96,7 +97,6 @@ private:
     qreal yTilt;
     bool drawing = false;
     bool usingTablet = false;
-    bool isErasing = false;
     bool isDrawing = false;
     int delayCounter;
 

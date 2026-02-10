@@ -62,7 +62,48 @@ void ToolSelectionMenu::createToolBar()
 		enablePolygonalLassoTool();
 		});
 	toolBar->addAction(polygonalAction);
+
+	QAction* magicWandAction = new QAction(
+		QIcon(QDir::currentPath() + "/Images/Icons/magicwand.png"),
+		tr("&MagicWand"),
+		this);
+	magicWandAction->setStatusTip(tr("&Magic Wand Tool"));;
+	connect(magicWandAction, &QAction::triggered, this, [&]() {
+		enableMagicWandTool();
+		});
+	toolBar->addAction(magicWandAction);
+
+	QAction* rectangularSelectionAction = new QAction(
+		QIcon(QDir::currentPath() + "/Images/Icons/rectangle.png"),
+		tr("&RetangularSelection"),
+		this);
+	rectangularSelectionAction->setStatusTip(tr("&Rectangular Selection Tool"));;
+	connect(rectangularSelectionAction, &QAction::triggered, this, [&]() {
+		enableRectangularSelectionTool();
+		});
+	toolBar->addAction(rectangularSelectionAction);
+
+	QAction* ellipticalSelectionAction = new QAction(
+		QIcon(QDir::currentPath() + "/Images/Icons/ellipse.png"),
+		tr("&EllipticalSelection"),
+		this);
+	ellipticalSelectionAction->setStatusTip(tr("&Elliptical Selection Tool"));;
+	connect(ellipticalSelectionAction, &QAction::triggered, this, [&]() {
+		ellipticalSelectionEnabled();
+		});
+	toolBar->addAction(ellipticalSelectionAction);
+
+	QAction* eraserAction = new QAction(
+		QIcon(QDir::currentPath() + "/Images/Icons/eraser.png"),
+		tr("&Eraser"),
+		this);
+	eraserAction->setStatusTip(tr("&Eraser Tool"));;
+	connect(eraserAction, &QAction::triggered, this, [&]() {
+		enableEraserTool();
+		});
+	toolBar->addAction(eraserAction);
 }
+
 
 void ToolSelectionMenu::disableTool()
 {
@@ -81,6 +122,22 @@ void ToolSelectionMenu::disableTool()
 	else if (selectedTool == "PolygonalLasso")
 	{
 		emit polygonalLassoDisabled();
+	} 
+	else if (selectedTool == "MagicWand")
+	{
+		emit magicWandDisabled();
+	}
+	else if (selectedTool == "RectangularSelection")
+	{
+		emit rectangularSelectionDisabled();
+	}
+	else if (selectedTool == "EllipticalSelection")
+	{
+		emit ellipticalSelectionDisabled();
+	}
+	else if (selectedTool == "Eraser")
+	{
+		emit eraserDisabled();
 	}
 }
 
@@ -116,5 +173,38 @@ void ToolSelectionMenu::enablePolygonalLassoTool()
 	selectedTool = "PolygonalLasso";
 
 }
+
+void ToolSelectionMenu::enableMagicWandTool()
+{
+	disableTool();
+	emit magicWandEnabled();
+	selectedTool = "MagicWand";
+
+}
+
+void ToolSelectionMenu::enableRectangularSelectionTool()
+{
+	disableTool();
+	emit rectangularSelectionEnabled();
+	selectedTool = "RectangularSelection";
+
+}
+
+void ToolSelectionMenu::enableEllipticalSelectionTool()
+{
+	disableTool();
+	emit ellipticalSelectionEnabled();
+	selectedTool = "EllipticalSelection";
+
+}
+
+void ToolSelectionMenu::enableEraserTool()
+{
+	disableTool();
+	emit eraserEnabled();
+	selectedTool = "Eraser";
+
+}
+
 
 

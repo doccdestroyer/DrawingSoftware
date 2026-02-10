@@ -99,6 +99,7 @@ void LayerManager::updateLayers(QVector<QImage> newLayers, QImage newOverlay, fl
     zoomPercentage = newPercentage;
     panOffset = newOffset;
     selectionsPath = newSelectionsPath;
+    //selected index
 }
 
 void LayerManager::addLayer(int destination, QString& name)
@@ -191,6 +192,7 @@ void LayerManager::redo()
     undoStack2.push(current);
     restore(redoStack2.pop());
 }
+
 void LayerManager::pushUndo()
 {
     QStringList state;
@@ -201,6 +203,7 @@ void LayerManager::pushUndo()
     redoStack2.clear();
     changingStack = false;
 }
+
 void LayerManager::onLayerClicked(QListWidgetItem* item)
 {
     if (!item) return;
@@ -208,6 +211,7 @@ void LayerManager::onLayerClicked(QListWidgetItem* item)
     int index = layersList->row(item);
     emit layerSelected(layer, index);
 }
+
 void LayerManager::onDeleteClicked()
 {
     int row = layersList->currentRow();
@@ -238,5 +242,3 @@ void LayerManager::onDeleteClicked()
     qDebug() << layersList->count();
 
 }
-
-

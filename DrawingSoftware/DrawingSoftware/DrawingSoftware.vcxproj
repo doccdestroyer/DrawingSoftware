@@ -93,9 +93,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BucketTool.cpp" />
+    <ClCompile Include="EllipticalSelectionTool.cpp" />
     <ClCompile Include="LassoTool.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="PolygonalLassoTool.cpp" />
+    <ClCompile Include="RectangularSelectionTool.cpp" />
     <ClCompile Include="ToolSelectionMenu.cpp">
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
@@ -117,6 +119,9 @@
   <ItemGroup>
     <QtMoc Include="UIManager.h" />
     <QtMoc Include="PolygonalLassoTool.h" />
+    <QtMoc Include="MagicWandTool.h" />
+    <QtMoc Include="RectangularSelectionTool.h" />
+    <QtMoc Include="EllipticalSelectionTool.h" />
     <ClInclude Include="UndoManager.h" />
     <QtMoc Include="ToolSelectionMenu.h" />
     <QtMoc Include="LassoTool.h" />

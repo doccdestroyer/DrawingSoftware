@@ -102,28 +102,13 @@ void PolygonalLassoTool::keyPressEvent(QKeyEvent* event)
         if (makingRemovalUndoStack.size() <= 1) return;
         if (isFirstClickUndoStack.size() <= 1) return;
 
-
-
         uiManager->undoManager->undo();
         layers = layerManager->layers;
         overlay = layerManager->selectionOverlay;
         selectionsPath = layerManager->selectionsPath;
-        //if (points.count() > 0 && isDrawing)
-        //{
-        //    points.remove(points.count() - 1);
-        //}
-        //else if (points.count() == 0)
-        //{
-        //    points.clear();
-        //    isDrawing = false;
-        //    isComplete = false;
-        //    isFirstClick = true;
-        //}
-
 
         isFirstClickRedoStack.push(isFirstClickUndoStack.pop());
         isFirstClick = isFirstClickUndoStack.top();
-
 
         isCompletedRedoStack.push(isCompletedUndoStack.pop());
         isComplete = isCompletedUndoStack.top();
@@ -140,32 +125,40 @@ void PolygonalLassoTool::keyPressEvent(QKeyEvent* event)
         pointsRedoStack.push(pointsUndoStack.pop());
         points = pointsUndoStack.top();
 
-        if (points.count() == 0)
-        {
-            //points.clear();
-            //isDrawing = false;
-            //isComplete = false;
-            //isFirstClick = true;
-        }
-        if (selectionsPath.count() == 0)
-        {
-            //clearSelectionOverlay();
-
-        }
-        //clearSelectionOverlay();
-
         updateSelectionOverlay();
         overlay = layerManager->selectionOverlay;
-
         update();
     }
 
     if (event->key() == Qt::Key_Y && event->modifiers() & Qt::ControlModifier)
     {
+
+        if (isFirstClickRedoStack.isEmpty()) return;
+        if (isCompletedRedoStack.isEmpty()) return;
+        if (isDrawingRedoStack.isEmpty()) return;
+        if (makingAdditionalSelectionRedoStack.isEmpty()) return;
+        if (pointsRedoStack.isEmpty()) return;
+
         uiManager->undoManager->redo();
         layers = layerManager->layers;
         overlay = layerManager->selectionOverlay;
+
+        isFirstClick = isFirstClickRedoStack.pop();
+        isFirstClickUndoStack.push(isFirstClick);
+
+        isComplete = isCompletedRedoStack.pop();
+        isCompletedUndoStack.push(isComplete);
+
+        isDrawing = isDrawingRedoStack.pop();
+        isDrawingUndoStack.push(isDrawing);
+
+        makingAdditionalSelection = makingAdditionalSelectionRedoStack.pop();
+        makingAdditionalSelectionUndoStack.push(makingAdditionalSelection);
+
+        points = pointsRedoStack.pop();
+        pointsUndoStack.push(points);
         update();
+
     }
 
     if (event->key() == Qt::Key_Space)
